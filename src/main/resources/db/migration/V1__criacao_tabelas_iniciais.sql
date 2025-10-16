@@ -1,8 +1,6 @@
--- =====================================================================
 -- Flyway Migration: V1
--- Título: Criação das Tabelas Iniciais do Sistema
--- Dialeto: SQL Padrão (Compatível com PostgreSQL/MySQL)
--- =====================================================================
+-- Título: Criação das Tabelas do Sistema
+
 
 
 -- Tabela 1: USUARIO
