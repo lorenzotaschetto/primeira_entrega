@@ -10,6 +10,5 @@ import java.util.List;
 @Repository
 public interface MetodoPagamentoRepository extends JpaRepository<MetodoPagamento, Long> {
     List<MetodoPagamento> findByUsuario(Usuario usuario);
-    List<MetodoPagamento> findByTipo(String tipo);
     List<MetodoPagamento> findByUsuarioAndTipo(Usuario usuario, String tipo);
 }

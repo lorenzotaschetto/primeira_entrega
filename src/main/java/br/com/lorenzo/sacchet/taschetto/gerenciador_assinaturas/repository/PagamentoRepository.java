@@ -16,7 +16,6 @@ import java.util.List;
 @Repository
 public interface PagamentoRepository extends JpaRepository<Pagamento, Long> {
     List<Pagamento> findByAssinatura(Assinatura assinatura);
-    List<Pagamento> findByDataPagamentoBetween(ZonedDateTime dataInicio, ZonedDateTime dataFim);
     List<Pagamento> findByAssinaturaAndDataPagamentoBetween(Assinatura assinatura, ZonedDateTime dataInicio, ZonedDateTime dataFim);
 
     @Query("SELECT COALESCE(SUM(p.valorPago), 0) FROM Pagamento p WHERE p.assinatura.usuario = :usuario")

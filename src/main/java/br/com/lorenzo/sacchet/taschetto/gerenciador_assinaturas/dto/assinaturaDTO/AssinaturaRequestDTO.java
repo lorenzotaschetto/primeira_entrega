@@ -32,9 +32,6 @@ public class AssinaturaRequestDTO {
     @NotNull(message = "Próxima cobrança é obrigatória")
     private LocalDate proximaCobranca;
 
-    @NotNull(message = "ID do usuário é obrigatório")
-    private Long idUsuario;
-
     @NotNull(message = "ID da categoria é obrigatório")
     private Long idCategoria;
 

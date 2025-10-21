@@ -14,10 +14,7 @@ import java.util.List;
 @Repository
 public interface AssinaturaRepository extends JpaRepository<Assinatura, Long> {
     List<Assinatura> findByUsuario(Usuario usuario);
-    List<Assinatura> findByCategoria(Categoria categoria);
     List<Assinatura> findByUsuarioAndCategoria(Usuario usuario, Categoria categoria);
-    List<Assinatura> findByProximaCobrancaLessThanEqual(LocalDate data);
-    List<Assinatura> findByTagsContaining(Tag tag);
     List<Assinatura> findByCategoriaAndUsuario(Categoria categoria, Usuario usuarioLogado);
     List<Assinatura> findByUsuarioAndProximaCobrancaLessThanEqual(Usuario usuarioLogado, LocalDate data);
     List<Assinatura> findByUsuarioAndTagsContaining(Usuario usuarioLogado, Tag tag);

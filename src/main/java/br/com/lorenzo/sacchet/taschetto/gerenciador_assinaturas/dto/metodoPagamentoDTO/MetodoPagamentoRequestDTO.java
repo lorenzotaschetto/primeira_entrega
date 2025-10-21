@@ -22,7 +22,4 @@ public class MetodoPagamentoRequestDTO {
 
     @Size(max = 50, message = "Informação adicional deve ter no máximo 50 caracteres")
     private String infoAdicional;
-
-    @NotNull(message = "ID do usuário é obrigatório")
-    private Long idUsuario;
 }

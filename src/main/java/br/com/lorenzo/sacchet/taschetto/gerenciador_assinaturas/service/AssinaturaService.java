@@ -2,6 +2,7 @@ package br.com.lorenzo.sacchet.taschetto.gerenciador_assinaturas.service;
 
 import br.com.lorenzo.sacchet.taschetto.gerenciador_assinaturas.dto.assinaturaDTO.AssinaturaRequestDTO;
 import br.com.lorenzo.sacchet.taschetto.gerenciador_assinaturas.dto.assinaturaDTO.AssinaturaResponseDTO;
+import br.com.lorenzo.sacchet.taschetto.gerenciador_assinaturas.exception.BusinessException;
 import br.com.lorenzo.sacchet.taschetto.gerenciador_assinaturas.exception.EntityNotFoundException;
 import br.com.lorenzo.sacchet.taschetto.gerenciador_assinaturas.infra.security.SecurityHelper;
 import br.com.lorenzo.sacchet.taschetto.gerenciador_assinaturas.model.*;
@@ -70,6 +71,10 @@ public class AssinaturaService {
 
         if (dto.getIdMetodoPago() != null) {
             MetodoPagamento mp = metodoPagamentoService.buscarEntidadePorId(dto.getIdMetodoPago());
+
+            if (!securityHelper.isAdmin(usuarioLogado) && !mp.getUsuario().getIdUsuario().equals(usuarioLogado.getIdUsuario())) {
+                throw new BusinessException("O método de pagamento selecionado (ID: " + dto.getIdMetodoPago() + ") não pertence ao usuário autenticado.");
+            }
             novaAssinatura.setMetodoPagamento(mp);
         }
 

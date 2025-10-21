@@ -2,8 +2,6 @@ package br.com.lorenzo.sacchet.taschetto.gerenciador_assinaturas.controller;
 
 import br.com.lorenzo.sacchet.taschetto.gerenciador_assinaturas.dto.metodoPagamentoDTO.MetodoPagamentoRequestDTO;
 import br.com.lorenzo.sacchet.taschetto.gerenciador_assinaturas.dto.metodoPagamentoDTO.MetodoPagamentoResponseDTO;
-import br.com.lorenzo.sacchet.taschetto.gerenciador_assinaturas.exception.EntityNotFoundException;
-import br.com.lorenzo.sacchet.taschetto.gerenciador_assinaturas.model.MetodoPagamento;
 import br.com.lorenzo.sacchet.taschetto.gerenciador_assinaturas.service.MetodoPagamentoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -12,7 +10,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.repository.query.Param;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;

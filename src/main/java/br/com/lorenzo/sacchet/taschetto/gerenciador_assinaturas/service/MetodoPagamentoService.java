@@ -53,23 +53,19 @@ public class MetodoPagamentoService {
 
     @Transactional
     public MetodoPagamentoResponseDTO salvar(MetodoPagamentoRequestDTO dto) {
+
         Usuario usuarioLogado = securityHelper.getUsuarioAutenticado();
 
-        if (!securityHelper.isAdmin(usuarioLogado) && !dto.getIdUsuario().equals(usuarioLogado.getIdUsuario())) {
-            throw new AccessDeniedException("Você só pode criar métodos de pagamento para si mesmo.");
-        }
-
-        Usuario usuario = usuarioRepository.findById(dto.getIdUsuario())
-                .orElseThrow(() -> new EntityNotFoundException("Usuário", dto.getIdUsuario()));
-
-
         MetodoPagamento metodoPagamento = new MetodoPagamento();
+
         metodoPagamento.setNomePersonalizado(dto.getNomePersonalizado());
         metodoPagamento.setTipo(dto.getTipo());
         metodoPagamento.setInfoAdicional(dto.getInfoAdicional());
-        metodoPagamento.setUsuario(usuario);
+
+        metodoPagamento.setUsuario(usuarioLogado);
 
         MetodoPagamento metodoSalvo = metodoPagamentoRepository.save(metodoPagamento);
+
         return convertToResponseDTO(metodoSalvo);
     }
 
