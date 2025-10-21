@@ -71,7 +71,6 @@ public class TagService {
                 .collect(Collectors.toList());
     }
 
-    // Métodos de conversão
     private TagDTO convertToDTO(Tag tag) {
         TagDTO dto = new TagDTO();
         dto.setIdTag(tag.getIdTag());
@@ -86,7 +85,6 @@ public class TagService {
         return tag;
     }
 
-    // Método auxiliar para outros services
     public Tag buscarEntidadePorId(Long id) {
         return tagRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Tag", id));

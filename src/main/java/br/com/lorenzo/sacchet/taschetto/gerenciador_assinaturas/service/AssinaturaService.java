@@ -1,16 +1,21 @@
 package br.com.lorenzo.sacchet.taschetto.gerenciador_assinaturas.service;
 
+import br.com.lorenzo.sacchet.taschetto.gerenciador_assinaturas.dto.assinaturaDTO.AssinaturaRequestDTO;
+import br.com.lorenzo.sacchet.taschetto.gerenciador_assinaturas.dto.assinaturaDTO.AssinaturaResponseDTO;
 import br.com.lorenzo.sacchet.taschetto.gerenciador_assinaturas.exception.EntityNotFoundException;
+import br.com.lorenzo.sacchet.taschetto.gerenciador_assinaturas.infra.security.SecurityHelper;
 import br.com.lorenzo.sacchet.taschetto.gerenciador_assinaturas.model.*;
-import br.com.lorenzo.sacchet.taschetto.gerenciador_assinaturas.dto.AssinaturaDTO;
 import br.com.lorenzo.sacchet.taschetto.gerenciador_assinaturas.repository.AssinaturaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.query.Param;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -31,24 +36,57 @@ public class AssinaturaService {
     @Autowired
     private MetodoPagamentoService metodoPagamentoService;
 
-    public List<AssinaturaDTO> listarTodas() {
+    @Autowired
+    private SecurityHelper securityHelper;
+
+    public List<AssinaturaResponseDTO> listarTodas() {
         return assinaturaRepository.findAll().stream()
-                .map(this::convertToDTO)
+                .map(this::convertToResponseDTO)
                 .collect(Collectors.toList());
     }
 
-    public Optional<AssinaturaDTO> buscarPorId(Long id) {
-        return assinaturaRepository.findById(id)
-                .map(this::convertToDTO);
+    @PreAuthorize("@securityService.checarPosseAssinatura(#id)")
+    public AssinaturaResponseDTO buscarPorId(@Param("id") Long id) {
+        Assinatura assinatura = assinaturaRepository.findById(id).get();
+        return convertToResponseDTO(assinatura);
     }
 
-    public AssinaturaDTO salvar(AssinaturaDTO assinaturaDTO) {
-        Assinatura assinatura = convertToEntity(assinaturaDTO);
-        Assinatura assinaturaSalva = assinaturaRepository.save(assinatura);
-        return convertToDTO(assinaturaSalva);
+    @Transactional
+    public AssinaturaResponseDTO salvar(AssinaturaRequestDTO dto) {
+
+        Usuario usuarioLogado = securityHelper.getUsuarioAutenticado();
+
+        Categoria categoria = categoriaService.buscarEntidadePorId(dto.getIdCategoria());
+
+        Assinatura novaAssinatura = new Assinatura();
+
+        novaAssinatura.setNome(dto.getNome());
+        novaAssinatura.setValor(dto.getValor());
+        novaAssinatura.setCicloPagamento(dto.getCicloPagamento());
+        novaAssinatura.setProximaCobranca(dto.getProximaCobranca());
+
+        novaAssinatura.setUsuario(usuarioLogado);
+        novaAssinatura.setCategoria(categoria);
+
+        if (dto.getIdMetodoPago() != null) {
+            MetodoPagamento mp = metodoPagamentoService.buscarEntidadePorId(dto.getIdMetodoPago());
+            novaAssinatura.setMetodoPagamento(mp);
+        }
+
+        if (dto.getIdsTag() != null && !dto.getIdsTag().isEmpty()) {
+            List<Tag> tags = tagService.buscarEntidadesPorIds(dto.getIdsTag());
+            novaAssinatura.setTags(tags);
+        } else {
+            novaAssinatura.setTags(Collections.emptyList());
+        }
+
+        Assinatura assinaturaSalva = assinaturaRepository.save(novaAssinatura);
+
+        return convertToResponseDTO(assinaturaSalva);
     }
 
-    public AssinaturaDTO atualizar(Long id, AssinaturaDTO assinaturaDTO) {
+    @PreAuthorize("@securityService.checarPosseAssinatura(#id)")
+    public AssinaturaResponseDTO atualizar(@Param("id") Long id, AssinaturaRequestDTO assinaturaDTO) {
         return assinaturaRepository.findById(id)
                 .map(assinatura -> {
                     assinatura.setNome(assinaturaDTO.getNome());
@@ -68,55 +106,60 @@ public class AssinaturaService {
                     }
 
                     Assinatura assinaturaAtualizada = assinaturaRepository.save(assinatura);
-                    return convertToDTO(assinaturaAtualizada);
+                    return convertToResponseDTO(assinaturaAtualizada);
                 })
                 .orElseThrow(() -> new EntityNotFoundException("Assinatura", id));
     }
 
-    public void deletar(Long id) {
-        if (!assinaturaRepository.existsById(id)) {
-            throw new EntityNotFoundException("Assinatura", id);
-        }
+    @Transactional
+    @PreAuthorize("@securityService.checarPosseAssinatura(#id)")
+    public void deletar(@Param("id") Long id) {
+
         assinaturaRepository.deleteById(id);
     }
 
-    public List<AssinaturaDTO> buscarPorUsuario(Long idUsuario) {
+    @PreAuthorize("@securityService.checarAcessoUsuario(#idUsuario)")
+    public List<AssinaturaResponseDTO> buscarPorUsuario(@Param("idUsuario") Long idUsuario) {
         Usuario usuario = usuarioService.buscarEntidadePorId(idUsuario);
         return assinaturaRepository.findByUsuario(usuario).stream()
-                .map(this::convertToDTO)
+                .map(this::convertToResponseDTO)
                 .collect(Collectors.toList());
     }
 
-    public List<AssinaturaDTO> buscarPorCategoria(Long idCategoria) {
+    public List<AssinaturaResponseDTO> buscarPorCategoria(Long idCategoria) {
+        Usuario usuarioLogado = securityHelper.getUsuarioAutenticado();
         Categoria categoria = categoriaService.buscarEntidadePorId(idCategoria);
-        return assinaturaRepository.findByCategoria(categoria).stream()
-                .map(this::convertToDTO)
+        return assinaturaRepository.findByCategoriaAndUsuario(categoria, usuarioLogado).stream()
+                .map(this::convertToResponseDTO)
                 .collect(Collectors.toList());
     }
 
-    public List<AssinaturaDTO> buscarPorUsuarioECategoria(Long idUsuario, Long idCategoria) {
+    @PreAuthorize("@securityService.checarAcessoUsuario(#idUsuario)")
+    public List<AssinaturaResponseDTO> buscarPorUsuarioECategoria(@Param("idUsuario") Long idUsuario, Long idCategoria) {
         Usuario usuario = usuarioService.buscarEntidadePorId(idUsuario);
         Categoria categoria = categoriaService.buscarEntidadePorId(idCategoria);
         return assinaturaRepository.findByUsuarioAndCategoria(usuario, categoria).stream()
-                .map(this::convertToDTO)
+                .map(this::convertToResponseDTO)
                 .collect(Collectors.toList());
     }
 
-    public List<AssinaturaDTO> buscarPorProximaCobrancaAte(LocalDate data) {
-        return assinaturaRepository.findByProximaCobrancaLessThanEqual(data).stream()
-                .map(this::convertToDTO)
+    public List<AssinaturaResponseDTO> buscarPorProximaCobrancaAte(LocalDate data) {
+        Usuario usuarioLogado = securityHelper.getUsuarioAutenticado();
+        return assinaturaRepository.findByUsuarioAndProximaCobrancaLessThanEqual(usuarioLogado, data).stream()
+                .map(this::convertToResponseDTO)
                 .collect(Collectors.toList());
     }
 
-    public List<AssinaturaDTO> buscarAssinaturasVencendoHoje() {
+    public List<AssinaturaResponseDTO> buscarAssinaturasVencendoHoje() {
         return buscarPorProximaCobrancaAte(LocalDate.now());
     }
 
-    public List<AssinaturaDTO> buscarAssinaturasVencendoEm(int dias) {
+    public List<AssinaturaResponseDTO> buscarAssinaturasVencendoEm(int dias) {
         return buscarPorProximaCobrancaAte(LocalDate.now().plusDays(dias));
     }
 
-    public BigDecimal calcularTotalMensalPorUsuario(Long idUsuario) {
+    @PreAuthorize("@securityService.checarAcessoUsuario(#idUsuario)")
+    public BigDecimal calcularTotalMensalPorUsuario(@Param("idUsuario") Long idUsuario) {
         List<Assinatura> assinaturas = assinaturaRepository.findByUsuario(usuarioService.buscarEntidadePorId(idUsuario));
         return assinaturas.stream()
                 .filter(a -> "MENSAL".equalsIgnoreCase(a.getCicloPagamento()))
@@ -124,7 +167,8 @@ public class AssinaturaService {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    public BigDecimal calcularTotalAnualPorUsuario(Long idUsuario) {
+    @PreAuthorize("@securityService.checarAcessoUsuario(#idUsuario)")
+    public BigDecimal calcularTotalAnualPorUsuario(@Param("idUsuario") Long idUsuario) {
         List<Assinatura> assinaturas = assinaturaRepository.findByUsuario(usuarioService.buscarEntidadePorId(idUsuario));
         return assinaturas.stream()
                 .map(a -> {
@@ -138,14 +182,17 @@ public class AssinaturaService {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    public List<AssinaturaDTO> buscarPorTag(Long idTag) {
+    public List<AssinaturaResponseDTO> buscarPorTag(Long idTag) {
+        Usuario usuarioLogado = securityHelper.getUsuarioAutenticado();
         Tag tag = tagService.buscarEntidadePorId(idTag);
-        return assinaturaRepository.findByTagsContaining(tag).stream()
-                .map(this::convertToDTO)
+        return assinaturaRepository.findByUsuarioAndTagsContaining(usuarioLogado, tag).stream()
+                .map(this::convertToResponseDTO)
                 .collect(Collectors.toList());
     }
 
-    public AssinaturaDTO adicionarTag(Long idAssinatura, Long idTag) {
+    @Transactional
+    @PreAuthorize("@securityService.checarPosseAssinatura(#idAssinatura)")
+    public AssinaturaResponseDTO adicionarTag(@Param("idAssinatura") Long idAssinatura, Long idTag) {
         Assinatura assinatura = assinaturaRepository.findById(idAssinatura)
                 .orElseThrow(() -> new EntityNotFoundException("Assinatura", idAssinatura));
         Tag tag = tagService.buscarEntidadePorId(idTag);
@@ -153,95 +200,59 @@ public class AssinaturaService {
         if (!assinatura.getTags().contains(tag)) {
             assinatura.getTags().add(tag);
             Assinatura assinaturaAtualizada = assinaturaRepository.save(assinatura);
-            return convertToDTO(assinaturaAtualizada);
+            return convertToResponseDTO(assinaturaAtualizada);
         }
-        return convertToDTO(assinatura);
+        return convertToResponseDTO(assinatura);
     }
 
-    public AssinaturaDTO removerTag(Long idAssinatura, Long idTag) {
+    @Transactional
+    @PreAuthorize("@securityService.checarPosseAssinatura(#idAssinatura)")
+    public AssinaturaResponseDTO removerTag(@Param("idAssinatura") Long idAssinatura, Long idTag) {
         Assinatura assinatura = assinaturaRepository.findById(idAssinatura)
                 .orElseThrow(() -> new EntityNotFoundException("Assinatura", idAssinatura));
         Tag tag = tagService.buscarEntidadePorId(idTag);
 
         assinatura.getTags().remove(tag);
         Assinatura assinaturaAtualizada = assinaturaRepository.save(assinatura);
-        return convertToDTO(assinaturaAtualizada);
+        return convertToResponseDTO(assinaturaAtualizada);
     }
 
-    // Métodos de conversão
-    private AssinaturaDTO convertToDTO(Assinatura assinatura) {
-        AssinaturaDTO dto = new AssinaturaDTO();
-        dto.setIdAssinatura(assinatura.getIdAssinatura());
-        dto.setNome(assinatura.getNome());
-        dto.setValor(assinatura.getValor());
-        dto.setCicloPagamento(assinatura.getCicloPagamento());
-        dto.setProximaCobranca(assinatura.getProximaCobranca());
-        dto.setIdUsuario(assinatura.getUsuario().getIdUsuario());
-        dto.setIdCategoria(assinatura.getCategoria().getIdCategoria());
-
-        if (assinatura.getMetodoPagamento() != null) {
-            dto.setIdMetodoPago(assinatura.getMetodoPagamento().getIdMetodoPago());
-        }
-
-        if (assinatura.getTags() != null && !assinatura.getTags().isEmpty()) {
-            dto.setIdsTag(assinatura.getTags().stream()
-                    .map(Tag::getIdTag)
-                    .collect(Collectors.toList()));
-        }
-
-        // Dados para exibição
-        dto.setNomeUsuario(assinatura.getUsuario().getNome());
-        dto.setNomeCategoria(assinatura.getCategoria().getNome());
-
-        if (assinatura.getMetodoPagamento() != null) {
-            dto.setNomeMetodoPagamento(assinatura.getMetodoPagamento().getNomePersonalizado());
-        }
-
-        if (assinatura.getTags() != null && !assinatura.getTags().isEmpty()) {
-            dto.setNomesTags(assinatura.getTags().stream()
-                    .map(Tag::getNome)
-                    .collect(Collectors.toList()));
-        }
-
-        return dto;
-    }
-
-    private Assinatura convertToEntity(AssinaturaDTO dto) {
-        Assinatura assinatura = new Assinatura();
-        assinatura.setIdAssinatura(dto.getIdAssinatura());
-        assinatura.setNome(dto.getNome());
-        assinatura.setValor(dto.getValor());
-        assinatura.setCicloPagamento(dto.getCicloPagamento());
-        assinatura.setProximaCobranca(dto.getProximaCobranca());
-
-        // Buscar relacionamentos
-        assinatura.setUsuario(usuarioService.buscarEntidadePorId(dto.getIdUsuario()));
-        assinatura.setCategoria(categoriaService.buscarEntidadePorId(dto.getIdCategoria()));
-
-        if (dto.getIdMetodoPago() != null) {
-            assinatura.setMetodoPagamento(metodoPagamentoService.buscarEntidadePorId(dto.getIdMetodoPago()));
-        }
-
-        if (dto.getIdsTag() != null && !dto.getIdsTag().isEmpty()) {
-            assinatura.setTags(tagService.buscarEntidadesPorIds(dto.getIdsTag()));
-        }
-
-        return assinatura;
-    }
-
-    // Método auxiliar para outros services
     public Assinatura buscarEntidadePorId(Long id) {
         return assinaturaRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Assinatura", id));
     }
 
-    // Método público para conversão - usado por outros services
-    public AssinaturaDTO convertEntityToDTO(Assinatura assinatura) {
-        return convertToDTO(assinatura);
-    }
+    private AssinaturaResponseDTO convertToResponseDTO(Assinatura assinatura) {
+        AssinaturaResponseDTO dto = new AssinaturaResponseDTO();
+        dto.setIdAssinatura(assinatura.getIdAssinatura());
+        dto.setNome(assinatura.getNome());
+        dto.setValor(assinatura.getValor());
+        dto.setCicloPagamento(assinatura.getCicloPagamento());
+        dto.setProximaCobranca(assinatura.getProximaCobranca());
 
-    // Método público para conversão - usado por outros services
-    public Assinatura convertDTOToEntity(AssinaturaDTO dto) {
-        return convertToEntity(dto);
+        if (assinatura.getUsuario() != null) {
+            dto.setIdUsuario(assinatura.getUsuario().getIdUsuario());
+            dto.setNomeUsuario(assinatura.getUsuario().getNome());
+        }
+
+        if (assinatura.getCategoria() != null) {
+            dto.setIdCategoria(assinatura.getCategoria().getIdCategoria());
+            dto.setNomeCategoria(assinatura.getCategoria().getNome());
+        }
+
+        if (assinatura.getMetodoPagamento() != null) {
+            dto.setIdMetodoPago(assinatura.getMetodoPagamento().getIdMetodoPago());
+            dto.setNomeMetodoPagamento(assinatura.getMetodoPagamento().getNomePersonalizado());
+        }
+
+        if (assinatura.getTags() != null && !assinatura.getTags().isEmpty()) {
+            dto.setIdsTag(assinatura.getTags().stream().map(Tag::getIdTag).collect(Collectors.toList()));
+            dto.setNomesTags(assinatura.getTags().stream().map(Tag::getNome).collect(Collectors.toList()));
+        } else {
+            dto.setIdsTag(Collections.emptyList());
+            dto.setNomesTags(Collections.emptyList());
+        }
+
+        return dto;
     }
 }

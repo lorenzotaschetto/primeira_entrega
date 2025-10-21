@@ -1,4 +1,4 @@
-package br.com.lorenzo.sacchet.taschetto.gerenciador_assinaturas.dto;
+package br.com.lorenzo.sacchet.taschetto.gerenciador_assinaturas.dto.assinaturaDTO;
 
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
@@ -15,8 +15,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class AssinaturaDTO {
-    private Long idAssinatura;
+public class AssinaturaRequestDTO {
 
     @NotBlank(message = "Nome da assinatura é obrigatório")
     @Size(max = 100, message = "Nome da assinatura deve ter no máximo 100 caracteres")
@@ -42,10 +41,4 @@ public class AssinaturaDTO {
     private Long idMetodoPago;
 
     private List<Long> idsTag;
-
-    // Para resposta com dados relacionados
-    private String nomeUsuario;
-    private String nomeCategoria;
-    private String nomeMetodoPagamento;
-    private List<String> nomesTags;
 }

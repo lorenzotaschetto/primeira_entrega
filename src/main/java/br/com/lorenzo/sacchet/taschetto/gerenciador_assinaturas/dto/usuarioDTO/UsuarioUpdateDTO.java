@@ -1,4 +1,4 @@
-package br.com.lorenzo.sacchet.taschetto.gerenciador_assinaturas.dto;
+package br.com.lorenzo.sacchet.taschetto.gerenciador_assinaturas.dto.usuarioDTO;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -10,8 +10,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class UsuarioDTO {
-    private Long idUsuario;
+public class UsuarioUpdateDTO {
 
     @NotBlank(message = "Nome é obrigatório")
     @Size(max = 150, message = "Nome deve ter no máximo 150 caracteres")
@@ -21,8 +20,4 @@ public class UsuarioDTO {
     @Email(message = "Email deve ter um formato válido")
     @Size(max = 255, message = "Email deve ter no máximo 255 caracteres")
     private String email;
-
-    @NotBlank(message = "Senha é obrigatória")
-    @Size(max = 255, message = "Senha deve ter no máximo 255 caracteres")
-    private String senhaHash;
 }

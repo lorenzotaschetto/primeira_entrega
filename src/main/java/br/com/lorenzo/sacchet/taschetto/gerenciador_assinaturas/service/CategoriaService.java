@@ -65,7 +65,6 @@ public class CategoriaService {
         return categoriaRepository.existsByNome(nome);
     }
 
-    // Métodos de conversão
     private CategoriaDTO convertToDTO(Categoria categoria) {
         CategoriaDTO dto = new CategoriaDTO();
         dto.setIdCategoria(categoria.getIdCategoria());
@@ -80,7 +79,6 @@ public class CategoriaService {
         return categoria;
     }
 
-    // Método auxiliar para outros services
     public Categoria buscarEntidadePorId(Long id) {
         return categoriaRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Categoria", id));

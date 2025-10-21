@@ -1,6 +1,8 @@
 package br.com.lorenzo.sacchet.taschetto.gerenciador_assinaturas.controller;
 
-import br.com.lorenzo.sacchet.taschetto.gerenciador_assinaturas.dto.PagamentoDTO;
+import br.com.lorenzo.sacchet.taschetto.gerenciador_assinaturas.dto.pagamentoDTO.PagamentoRequestDTO;
+import br.com.lorenzo.sacchet.taschetto.gerenciador_assinaturas.dto.pagamentoDTO.PagamentoResponseDTO;
+import br.com.lorenzo.sacchet.taschetto.gerenciador_assinaturas.dto.pagamentoDTO.PagamentoUpdateDTO;
 import br.com.lorenzo.sacchet.taschetto.gerenciador_assinaturas.service.PagamentoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -10,7 +12,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -19,7 +20,6 @@ import java.math.BigDecimal;
 import java.net.URI;
 import java.time.ZonedDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/pagamentos")
@@ -32,8 +32,8 @@ public class PagamentoController {
     @GetMapping
     @Operation(summary = "Listar todos os pagamentos", description = "Retorna uma lista com todos os pagamentos registrados")
     @ApiResponse(responseCode = "200", description = "Lista de pagamentos retornada com sucesso")
-    public ResponseEntity<List<PagamentoDTO>> listarTodos() {
-        List<PagamentoDTO> pagamentos = pagamentoService.listarTodos();
+    public ResponseEntity<List<PagamentoResponseDTO>> listarTodos() {
+        List<PagamentoResponseDTO> pagamentos = pagamentoService.listarTodos();
         return ResponseEntity.ok(pagamentos);
     }
 
@@ -43,11 +43,10 @@ public class PagamentoController {
         @ApiResponse(responseCode = "200", description = "Pagamento encontrado"),
         @ApiResponse(responseCode = "404", description = "Pagamento não encontrado")
     })
-    public ResponseEntity<PagamentoDTO> buscarPorId(
+    public ResponseEntity<PagamentoResponseDTO> buscarPorId(
             @Parameter(description = "ID do pagamento") @PathVariable Long id) {
-        Optional<PagamentoDTO> pagamento = pagamentoService.buscarPorId(id);
-        return pagamento.map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        PagamentoResponseDTO pagamento = pagamentoService.buscarPorId(id);
+        return ResponseEntity.ok(pagamento);
     }
 
     @PostMapping
@@ -56,8 +55,8 @@ public class PagamentoController {
         @ApiResponse(responseCode = "201", description = "Pagamento registrado com sucesso"),
         @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos")
     })
-    public ResponseEntity<PagamentoDTO> criar(@Valid @RequestBody PagamentoDTO pagamento, UriComponentsBuilder uriBuilder) {
-        PagamentoDTO pagamentoSalvo = pagamentoService.salvar(pagamento);
+    public ResponseEntity<PagamentoResponseDTO> criar(@Valid @RequestBody PagamentoRequestDTO pagamento, UriComponentsBuilder uriBuilder) {
+        PagamentoResponseDTO pagamentoSalvo = pagamentoService.registrarPagamento(pagamento);
         URI uri = uriBuilder.path("/api/pagamentos/{id}")
                 .buildAndExpand(pagamentoSalvo.getIdPagamento())
                 .toUri();
@@ -71,10 +70,10 @@ public class PagamentoController {
         @ApiResponse(responseCode = "404", description = "Pagamento não encontrado"),
         @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos")
     })
-    public ResponseEntity<PagamentoDTO> atualizar(
+    public ResponseEntity<PagamentoResponseDTO> atualizar(
             @Parameter(description = "ID do pagamento") @PathVariable Long id,
-            @Valid @RequestBody PagamentoDTO pagamento) {
-        PagamentoDTO pagamentoAtualizado = pagamentoService.atualizar(id, pagamento);
+            @Valid @RequestBody PagamentoUpdateDTO pagamento) {
+        PagamentoResponseDTO pagamentoAtualizado = pagamentoService.atualizar(id, pagamento);
         return ResponseEntity.ok(pagamentoAtualizado);
     }
 
@@ -96,21 +95,21 @@ public class PagamentoController {
         @ApiResponse(responseCode = "200", description = "Pagamentos encontrados"),
         @ApiResponse(responseCode = "404", description = "Assinatura não encontrada")
     })
-    public ResponseEntity<List<PagamentoDTO>> buscarPorAssinatura(
+    public ResponseEntity<List<PagamentoResponseDTO>> buscarPorAssinatura(
             @Parameter(description = "ID da assinatura") @PathVariable Long idAssinatura) {
-        List<PagamentoDTO> pagamentos = pagamentoService.buscarPorAssinatura(idAssinatura);
+        List<PagamentoResponseDTO> pagamentos = pagamentoService.buscarPorAssinatura(idAssinatura);
         return ResponseEntity.ok(pagamentos);
     }
 
     @GetMapping("/periodo")
     @Operation(summary = "Buscar pagamentos por período", description = "Retorna pagamentos realizados em um período específico")
     @ApiResponse(responseCode = "200", description = "Pagamentos encontrados")
-    public ResponseEntity<List<PagamentoDTO>> buscarPorPeriodo(
+    public ResponseEntity<List<PagamentoResponseDTO>> buscarPorPeriodo(
             @Parameter(description = "Data início (ISO format)")
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) ZonedDateTime dataInicio,
             @Parameter(description = "Data fim (ISO format)")
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) ZonedDateTime dataFim) {
-        List<PagamentoDTO> pagamentos = pagamentoService.buscarPorPeriodo(dataInicio, dataFim);
+        List<PagamentoResponseDTO> pagamentos = pagamentoService.buscarPorPeriodoDoUsuarioLogado(dataInicio, dataFim);
         return ResponseEntity.ok(pagamentos);
     }
 
@@ -120,13 +119,13 @@ public class PagamentoController {
         @ApiResponse(responseCode = "200", description = "Pagamentos encontrados"),
         @ApiResponse(responseCode = "404", description = "Assinatura não encontrada")
     })
-    public ResponseEntity<List<PagamentoDTO>> buscarPorAssinaturaEPeriodo(
+    public ResponseEntity<List<PagamentoResponseDTO>> buscarPorAssinaturaEPeriodo(
             @Parameter(description = "ID da assinatura") @PathVariable Long idAssinatura,
             @Parameter(description = "Data início (ISO format)")
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) ZonedDateTime dataInicio,
             @Parameter(description = "Data fim (ISO format)")
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) ZonedDateTime dataFim) {
-        List<PagamentoDTO> pagamentos = pagamentoService.buscarPorAssinaturaEPeriodo(idAssinatura, dataInicio, dataFim);
+        List<PagamentoResponseDTO> pagamentos = pagamentoService.buscarPorAssinaturaEPeriodo(idAssinatura, dataInicio, dataFim);
         return ResponseEntity.ok(pagamentos);
     }
 
@@ -148,9 +147,8 @@ public class PagamentoController {
         @ApiResponse(responseCode = "200", description = "Total calculado com sucesso"),
         @ApiResponse(responseCode = "404", description = "Usuário não encontrado")
     })
-    public ResponseEntity<BigDecimal> calcularTotalPagoPorUsuario(
-            @Parameter(description = "ID do usuário") @PathVariable Long idUsuario) {
-        BigDecimal total = pagamentoService.calcularTotalPagoPorUsuario(idUsuario);
+    public ResponseEntity<BigDecimal> calcularTotalPagoPorUsuario() {
+        BigDecimal total = pagamentoService.calcularTotalPagoPeloUsuarioLogado();
         return ResponseEntity.ok(total);
     }
 
@@ -162,37 +160,27 @@ public class PagamentoController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) ZonedDateTime dataInicio,
             @Parameter(description = "Data fim (ISO format)")
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) ZonedDateTime dataFim) {
-        BigDecimal total = pagamentoService.calcularTotalPagoPorPeriodo(dataInicio, dataFim);
-        return ResponseEntity.ok(total);
-    }
-
-    @GetMapping("/usuario/{idUsuario}/periodo/total")
-    @Operation(summary = "Calcular total pago por usuário em período", description = "Retorna o total pago por um usuário em período específico")
-    @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Total calculado com sucesso"),
-        @ApiResponse(responseCode = "404", description = "Usuário não encontrado")
-    })
-    public ResponseEntity<BigDecimal> calcularTotalPagoPorUsuarioEPeriodo(
-            @Parameter(description = "ID do usuário") @PathVariable Long idUsuario,
-            @Parameter(description = "Data início (ISO format)")
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) ZonedDateTime dataInicio,
-            @Parameter(description = "Data fim (ISO format)")
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) ZonedDateTime dataFim) {
-        BigDecimal total = pagamentoService.calcularTotalPagoPorUsuarioEPeriodo(idUsuario, dataInicio, dataFim);
+        BigDecimal total = pagamentoService.calcularTotalPagoPeloUsuarioLogadoPorPeriodo(dataInicio, dataFim);
         return ResponseEntity.ok(total);
     }
 
     @PostMapping("/registrar")
-    @Operation(summary = "Registrar pagamento automaticamente", description = "Registra um pagamento e atualiza automaticamente a próxima cobrança da assinatura")
+    @Operation(summary = "Registrar novo pagamento", description = "Registra um novo pagamento e atualiza automaticamente a próxima cobrança da assinatura associada.")
     @ApiResponses({
-        @ApiResponse(responseCode = "201", description = "Pagamento registrado e próxima cobrança atualizada"),
-        @ApiResponse(responseCode = "404", description = "Assinatura não encontrada"),
-        @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos")
+            @ApiResponse(responseCode = "201", description = "Pagamento registrado com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Assinatura não encontrada"),
+            @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos no corpo da requisição")
     })
-    public ResponseEntity<PagamentoDTO> registrarPagamento(
-            @Parameter(description = "ID da assinatura") @RequestParam Long idAssinatura,
-            @Parameter(description = "Valor pago") @RequestParam BigDecimal valorPago) {
-        PagamentoDTO pagamento = pagamentoService.registrarPagamento(idAssinatura, valorPago);
-        return ResponseEntity.status(HttpStatus.CREATED).body(pagamento);
+    public ResponseEntity<PagamentoResponseDTO> registrarPagamento(
+            @RequestBody @Valid PagamentoRequestDTO dto,
+            UriComponentsBuilder uriBuilder
+    ) {
+        PagamentoResponseDTO pagamentoSalvo = pagamentoService.registrarPagamento(dto);
+
+        URI uri = uriBuilder.path("/api/pagamentos/{id}")
+                .buildAndExpand(pagamentoSalvo.getIdPagamento())
+                .toUri();
+
+        return ResponseEntity.created(uri).body(pagamentoSalvo);
     }
 }

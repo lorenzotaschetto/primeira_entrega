@@ -1,18 +1,26 @@
 package br.com.lorenzo.sacchet.taschetto.gerenciador_assinaturas.service;
 
-import br.com.lorenzo.sacchet.taschetto.gerenciador_assinaturas.model.Pagamento;
-import br.com.lorenzo.sacchet.taschetto.gerenciador_assinaturas.model.Assinatura;
-import br.com.lorenzo.sacchet.taschetto.gerenciador_assinaturas.dto.PagamentoDTO;
-import br.com.lorenzo.sacchet.taschetto.gerenciador_assinaturas.repository.PagamentoRepository;
+import br.com.lorenzo.sacchet.taschetto.gerenciador_assinaturas.dto.pagamentoDTO.PagamentoRequestDTO;
+import br.com.lorenzo.sacchet.taschetto.gerenciador_assinaturas.dto.pagamentoDTO.PagamentoResponseDTO;
+import br.com.lorenzo.sacchet.taschetto.gerenciador_assinaturas.dto.pagamentoDTO.PagamentoUpdateDTO;
 import br.com.lorenzo.sacchet.taschetto.gerenciador_assinaturas.exception.EntityNotFoundException;
+import br.com.lorenzo.sacchet.taschetto.gerenciador_assinaturas.infra.security.SecurityHelper;
+import br.com.lorenzo.sacchet.taschetto.gerenciador_assinaturas.model.Assinatura;
+import br.com.lorenzo.sacchet.taschetto.gerenciador_assinaturas.model.Pagamento;
+import br.com.lorenzo.sacchet.taschetto.gerenciador_assinaturas.model.Usuario;
+import br.com.lorenzo.sacchet.taschetto.gerenciador_assinaturas.repository.AssinaturaRepository;
+import br.com.lorenzo.sacchet.taschetto.gerenciador_assinaturas.repository.PagamentoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.query.Param;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.Clock;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -22,113 +30,113 @@ public class PagamentoService {
     private PagamentoRepository pagamentoRepository;
 
     @Autowired
-    private AssinaturaService assinaturaService;
+    private AssinaturaRepository assinaturaRepository;
 
-    public List<PagamentoDTO> listarTodos() {
+    @Autowired
+    private SecurityHelper securityHelper;
+    @Autowired
+    private Clock clock;
+
+
+    public List<PagamentoResponseDTO> listarTodos() {
         return pagamentoRepository.findAll().stream()
-                .map(this::convertToDTO)
+                .map(this::convertToResponseDTO)
                 .collect(Collectors.toList());
     }
 
-    public Optional<PagamentoDTO> buscarPorId(Long id) {
-        return pagamentoRepository.findById(id)
-                .map(this::convertToDTO);
+    @PreAuthorize("@securityService.checarPossePagamento(#id)")
+    public PagamentoResponseDTO buscarPorId(@Param("id") Long id) {
+        Pagamento pagamento = buscarEntidadePorId(id);
+        return convertToResponseDTO(pagamento);
     }
 
-    public PagamentoDTO salvar(PagamentoDTO pagamentoDTO) {
-        Pagamento pagamento = convertToEntity(pagamentoDTO);
+    @Transactional
+    @PreAuthorize("@securityService.checarPosseAssinatura(#dto.idAssinatura)")
+    public PagamentoResponseDTO registrarPagamento(@Param("dto") PagamentoRequestDTO dto) {
+        Assinatura assinatura = assinaturaRepository.findById(dto.getIdAssinatura())
+                .orElseThrow(() -> new EntityNotFoundException("Assinatura", dto.getIdAssinatura()));
+        Pagamento pagamento = new Pagamento();
+        pagamento.setAssinatura(assinatura);
+        pagamento.setValorPago(dto.getValorPago());
+        pagamento.setDataPagamento(ZonedDateTime.now(clock));
+
         Pagamento pagamentoSalvo = pagamentoRepository.save(pagamento);
-        return convertToDTO(pagamentoSalvo);
+
+        LocalDate proximaCobranca = calcularProximaCobranca(assinatura);
+        assinatura.setProximaCobranca(proximaCobranca);
+
+        return convertToResponseDTO(pagamentoSalvo);
     }
 
-    public PagamentoDTO atualizar(Long id, PagamentoDTO pagamentoDTO) {
-        return pagamentoRepository.findById(id)
-                .map(pagamento -> {
-                    pagamento.setDataPagamento(pagamentoDTO.getDataPagamento());
-                    pagamento.setValorPago(pagamentoDTO.getValorPago());
-                    pagamento.setAssinatura(assinaturaService.buscarEntidadePorId(pagamentoDTO.getIdAssinatura()));
-                    Pagamento pagamentoAtualizado = pagamentoRepository.save(pagamento);
-                    return convertToDTO(pagamentoAtualizado);
-                })
-                .orElseThrow(() -> new EntityNotFoundException("Pagamento", id));
+    @Transactional
+    @PreAuthorize("@securityService.checarPossePagamento(#id)")
+    public PagamentoResponseDTO atualizar(@Param("id") Long id, PagamentoUpdateDTO dto) {
+        Pagamento pagamento = buscarEntidadePorId(id);
+
+        pagamento.setValorPago(dto.getValorPago());
+        pagamento.setDataPagamento(dto.getDataPagamento());
+
+        Pagamento pagamentoAtualizado = pagamentoRepository.save(pagamento);
+        return convertToResponseDTO(pagamentoAtualizado);
     }
 
-    public void deletar(Long id) {
-        if (!pagamentoRepository.existsById(id)) {
-            throw new EntityNotFoundException("Pagamento", id);
-        }
+    @Transactional
+    @PreAuthorize("@securityService.checarPossePagamento(#id)")
+    public void deletar(@Param("id") Long id) {
         pagamentoRepository.deleteById(id);
     }
 
-    public List<PagamentoDTO> buscarPorAssinatura(Long idAssinatura) {
-        Assinatura assinatura = assinaturaService.buscarEntidadePorId(idAssinatura);
+
+    @PreAuthorize("@securityService.checarPosseAssinatura(#idAssinatura)")
+    public List<PagamentoResponseDTO> buscarPorAssinatura(@Param("idAssinatura") Long idAssinatura) {
+        Assinatura assinatura = assinaturaRepository.findById(idAssinatura)
+                .orElseThrow(() -> new EntityNotFoundException("Assinatura", idAssinatura));
         return pagamentoRepository.findByAssinatura(assinatura).stream()
-                .map(this::convertToDTO)
+                .map(this::convertToResponseDTO)
                 .collect(Collectors.toList());
     }
 
-    public List<PagamentoDTO> buscarPorPeriodo(ZonedDateTime dataInicio, ZonedDateTime dataFim) {
-        return pagamentoRepository.findByDataPagamentoBetween(dataInicio, dataFim).stream()
-                .map(this::convertToDTO)
+    public List<PagamentoResponseDTO> buscarPorPeriodoDoUsuarioLogado(ZonedDateTime dataInicio, ZonedDateTime dataFim) {
+        Usuario usuarioLogado = securityHelper.getUsuarioAutenticado();
+
+        List<Pagamento> pagamentos = pagamentoRepository.findByAssinaturaUsuarioAndDataPagamentoBetween(usuarioLogado, dataInicio, dataFim);
+
+        return pagamentos.stream()
+                .map(this::convertToResponseDTO)
                 .collect(Collectors.toList());
     }
-
-    public List<PagamentoDTO> buscarPorAssinaturaEPeriodo(Long idAssinatura, ZonedDateTime dataInicio, ZonedDateTime dataFim) {
-        Assinatura assinatura = assinaturaService.buscarEntidadePorId(idAssinatura);
+    @PreAuthorize("@securityService.checarPosseAssinatura(#idAssinatura)")
+    public List<PagamentoResponseDTO> buscarPorAssinaturaEPeriodo(@Param("idAssinatura") Long idAssinatura, ZonedDateTime dataInicio, ZonedDateTime dataFim) {
+        Assinatura assinatura = assinaturaRepository.findById(idAssinatura)
+                .orElseThrow(() -> new EntityNotFoundException("Assinatura", idAssinatura)); // Redundante
         return pagamentoRepository.findByAssinaturaAndDataPagamentoBetween(assinatura, dataInicio, dataFim).stream()
-                .map(this::convertToDTO)
+                .map(this::convertToResponseDTO)
                 .collect(Collectors.toList());
     }
 
-    public BigDecimal calcularTotalPagoPorAssinatura(Long idAssinatura) {
-        List<Pagamento> pagamentos = pagamentoRepository.findByAssinatura(assinaturaService.buscarEntidadePorId(idAssinatura));
+    @PreAuthorize("@securityService.checarPosseAssinatura(#idAssinatura)")
+    public BigDecimal calcularTotalPagoPorAssinatura(@Param("idAssinatura") Long idAssinatura) {
+        Assinatura assinatura = assinaturaRepository.findById(idAssinatura)
+                .orElseThrow(() -> new EntityNotFoundException("Assinatura", idAssinatura)); // Redundante
+        List<Pagamento> pagamentos = pagamentoRepository.findByAssinatura(assinatura);
         return pagamentos.stream()
                 .map(Pagamento::getValorPago)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    public BigDecimal calcularTotalPagoPorUsuario(Long idUsuario) {
-        List<Assinatura> assinaturas = assinaturaService.buscarPorUsuario(idUsuario).stream()
-                .map(dto -> assinaturaService.buscarEntidadePorId(dto.getIdAssinatura()))
-                .collect(Collectors.toList());
-        return assinaturas.stream()
-                .flatMap(assinatura -> pagamentoRepository.findByAssinatura(assinatura).stream())
-                .map(Pagamento::getValorPago)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    public BigDecimal calcularTotalPagoPeloUsuarioLogado() {
+        Usuario usuarioLogado = securityHelper.getUsuarioAutenticado();
+        return pagamentoRepository.sumValorPagoByUsuario(usuarioLogado);
     }
 
-    public BigDecimal calcularTotalPagoPorPeriodo(ZonedDateTime dataInicio, ZonedDateTime dataFim) {
-        List<Pagamento> pagamentos = pagamentoRepository.findByDataPagamentoBetween(dataInicio, dataFim);
-        return pagamentos.stream()
-                .map(Pagamento::getValorPago)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    public BigDecimal calcularTotalPagoPeloUsuarioLogadoPorPeriodo(ZonedDateTime dataInicio, ZonedDateTime dataFim) {
+        Usuario usuarioLogado = securityHelper.getUsuarioAutenticado();
+        return pagamentoRepository.sumValorPagoByUsuarioAndPeriodo(usuarioLogado, dataInicio, dataFim); // Exemplo
     }
 
-    public BigDecimal calcularTotalPagoPorUsuarioEPeriodo(Long idUsuario, ZonedDateTime dataInicio, ZonedDateTime dataFim) {
-        List<Assinatura> assinaturas = assinaturaService.buscarPorUsuario(idUsuario).stream()
-                .map(dto -> assinaturaService.buscarEntidadePorId(dto.getIdAssinatura()))
-                .collect(Collectors.toList());
-        return assinaturas.stream()
-                .flatMap(assinatura -> pagamentoRepository.findByAssinaturaAndDataPagamentoBetween(assinatura, dataInicio, dataFim).stream())
-                .map(Pagamento::getValorPago)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-    }
-
-    public PagamentoDTO registrarPagamento(Long idAssinatura, BigDecimal valorPago) {
-        Assinatura assinatura = assinaturaService.buscarEntidadePorId(idAssinatura);
-
-        Pagamento pagamento = new Pagamento();
-        pagamento.setAssinatura(assinatura);
-        pagamento.setValorPago(valorPago);
-        pagamento.setDataPagamento(ZonedDateTime.now());
-
-        // Atualizar próxima cobrança da assinatura
-        LocalDate proximaCobranca = calcularProximaCobranca(assinatura);
-        assinatura.setProximaCobranca(proximaCobranca);
-        assinaturaService.salvar(assinaturaService.convertEntityToDTO(assinatura)); // Usar método público de conversão
-
-        Pagamento pagamentoSalvo = pagamentoRepository.save(pagamento);
-        return convertToDTO(pagamentoSalvo);
+    private Pagamento buscarEntidadePorId(Long id) {
+        return pagamentoRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Pagamento", id));
     }
 
     private LocalDate calcularProximaCobranca(Assinatura assinatura) {
@@ -141,34 +149,18 @@ public class PagamentoService {
             case "SEMANAL" -> dataAtual.plusWeeks(1);
             case "TRIMESTRAL" -> dataAtual.plusMonths(3);
             case "SEMESTRAL" -> dataAtual.plusMonths(6);
-            default -> dataAtual.plusMonths(1); // Default para mensal
+            default -> dataAtual.plusMonths(1);
         };
     }
 
-    // Métodos de conversão
-    private PagamentoDTO convertToDTO(Pagamento pagamento) {
-        PagamentoDTO dto = new PagamentoDTO();
+    private PagamentoResponseDTO convertToResponseDTO(Pagamento pagamento) {
+        PagamentoResponseDTO dto = new PagamentoResponseDTO();
         dto.setIdPagamento(pagamento.getIdPagamento());
         dto.setDataPagamento(pagamento.getDataPagamento());
         dto.setValorPago(pagamento.getValorPago());
-        dto.setIdAssinatura(pagamento.getAssinatura().getIdAssinatura());
-
-        // Dados para exibição
-        dto.setNomeAssinatura(pagamento.getAssinatura().getNome());
-        dto.setNomeUsuario(pagamento.getAssinatura().getUsuario().getNome());
-
+        if (pagamento.getAssinatura() != null) {
+            dto.setIdAssinatura(pagamento.getAssinatura().getIdAssinatura());
+        }
         return dto;
-    }
-
-    private Pagamento convertToEntity(PagamentoDTO dto) {
-        Pagamento pagamento = new Pagamento();
-        pagamento.setIdPagamento(dto.getIdPagamento());
-        pagamento.setDataPagamento(dto.getDataPagamento());
-        pagamento.setValorPago(dto.getValorPago());
-
-        // Buscar assinatura
-        pagamento.setAssinatura(assinaturaService.buscarEntidadePorId(dto.getIdAssinatura()));
-
-        return pagamento;
     }
 }

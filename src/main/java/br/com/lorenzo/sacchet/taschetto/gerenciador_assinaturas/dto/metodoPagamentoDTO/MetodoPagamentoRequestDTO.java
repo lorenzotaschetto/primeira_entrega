@@ -1,4 +1,4 @@
-package br.com.lorenzo.sacchet.taschetto.gerenciador_assinaturas.dto;
+package br.com.lorenzo.sacchet.taschetto.gerenciador_assinaturas.dto.metodoPagamentoDTO;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -10,8 +10,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class MetodoPagamentoDTO {
-    private Long idMetodoPago;
+public class MetodoPagamentoRequestDTO {
 
     @NotBlank(message = "Nome personalizado é obrigatório")
     @Size(max = 50, message = "Nome personalizado deve ter no máximo 50 caracteres")

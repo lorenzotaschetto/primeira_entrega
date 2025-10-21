@@ -1,12 +1,20 @@
 package br.com.lorenzo.sacchet.taschetto.gerenciador_assinaturas.service;
 
+import br.com.lorenzo.sacchet.taschetto.gerenciador_assinaturas.dto.usuarioDTO.UsuarioChangePasswordDTO;
+import br.com.lorenzo.sacchet.taschetto.gerenciador_assinaturas.dto.usuarioDTO.UsuarioCreateDTO;
+import br.com.lorenzo.sacchet.taschetto.gerenciador_assinaturas.dto.usuarioDTO.UsuarioResponseDTO;
+import br.com.lorenzo.sacchet.taschetto.gerenciador_assinaturas.dto.usuarioDTO.UsuarioUpdateDTO;
+import br.com.lorenzo.sacchet.taschetto.gerenciador_assinaturas.exception.BusinessException;
+import br.com.lorenzo.sacchet.taschetto.gerenciador_assinaturas.model.Perfil;
 import br.com.lorenzo.sacchet.taschetto.gerenciador_assinaturas.model.Usuario;
-import br.com.lorenzo.sacchet.taschetto.gerenciador_assinaturas.dto.UsuarioDTO;
 import br.com.lorenzo.sacchet.taschetto.gerenciador_assinaturas.repository.UsuarioRepository;
 import br.com.lorenzo.sacchet.taschetto.gerenciador_assinaturas.exception.EntityNotFoundException;
-import br.com.lorenzo.sacchet.taschetto.gerenciador_assinaturas.exception.BusinessException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.query.Param;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -18,75 +26,90 @@ public class UsuarioService {
     @Autowired
     private UsuarioRepository usuarioRepository;
 
-    public List<UsuarioDTO> listarTodos() {
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+
+    public List<UsuarioResponseDTO> listarTodos() {
         return usuarioRepository.findAll().stream()
-                .map(this::convertToDTO)
+                .map(this::convertToResponseDTO)
                 .collect(Collectors.toList());
     }
 
-    public Optional<UsuarioDTO> buscarPorId(Long id) {
-        return usuarioRepository.findById(id)
-                .map(this::convertToDTO);
-    }
-
-    public UsuarioDTO salvar(UsuarioDTO usuarioDTO) {
-        Usuario usuario = convertToEntity(usuarioDTO);
-        Usuario usuarioSalvo = usuarioRepository.save(usuario);
-        return convertToDTO(usuarioSalvo);
-    }
-
-    public UsuarioDTO atualizar(Long id, UsuarioDTO usuarioDTO) {
-        return usuarioRepository.findById(id)
-                .map(usuario -> {
-                    usuario.setNome(usuarioDTO.getNome());
-                    usuario.setEmail(usuarioDTO.getEmail());
-                    if (usuarioDTO.getSenhaHash() != null && !usuarioDTO.getSenhaHash().isEmpty()) {
-                        usuario.setSenhaHash(usuarioDTO.getSenhaHash());
-                    }
-                    Usuario usuarioAtualizado = usuarioRepository.save(usuario);
-                    return convertToDTO(usuarioAtualizado);
-                })
+    @PreAuthorize("@securityService.checarAcessoUsuario(#id)")
+    public UsuarioResponseDTO buscarPorId(@Param("id") Long id) {
+        Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Usuário", id));
+        return convertToResponseDTO(usuario);
     }
 
-    public void deletar(Long id) {
-        if (!usuarioRepository.existsById(id)) {
-            throw new EntityNotFoundException("Usuário", id);
+    @Transactional
+    public UsuarioResponseDTO registrar(UsuarioCreateDTO dto) {
+        if (usuarioRepository.existsByEmail(dto.getEmail())) {
+            throw new BusinessException("Email já cadastrado.");
         }
+
+        Usuario novoUsuario = new Usuario();
+        novoUsuario.setNome(dto.getNome());
+        novoUsuario.setEmail(dto.getEmail());
+        novoUsuario.setSenhaHash(passwordEncoder.encode(dto.getSenha()));
+        novoUsuario.setPerfil(Perfil.ROLE_USUARIO);
+
+        Usuario usuarioSalvo = usuarioRepository.save(novoUsuario);
+        return convertToResponseDTO(usuarioSalvo);
+    }
+
+    @Transactional
+    @PreAuthorize("@securityService.checarAcessoUsuario(#id)")
+    public UsuarioResponseDTO atualizar(@Param("id") Long id, UsuarioUpdateDTO dto) {
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Usuário", id));
+
+        usuario.setNome(dto.getNome());
+        usuario.setEmail(dto.getEmail());
+
+        Usuario usuarioAtualizado = usuarioRepository.save(usuario);
+        return convertToResponseDTO(usuarioAtualizado);
+    }
+    @Transactional
+    @PreAuthorize("@securityService.checarAcessoUsuario(#id)")
+    public void deletar(@Param("id") Long id) {
         usuarioRepository.deleteById(id);
     }
 
-    public Optional<UsuarioDTO> buscarPorEmail(String email) {
+    public Optional<UsuarioResponseDTO> buscarPorEmail(String email) {
         return usuarioRepository.findByEmail(email)
-                .map(this::convertToDTO);
+                .map(this::convertToResponseDTO);
     }
 
     public boolean existePorEmail(String email) {
         return usuarioRepository.existsByEmail(email);
     }
 
-    // Métodos de conversão
-    private UsuarioDTO convertToDTO(Usuario usuario) {
-        UsuarioDTO dto = new UsuarioDTO();
-        dto.setIdUsuario(usuario.getIdUsuario());
-        dto.setNome(usuario.getNome());
-        dto.setEmail(usuario.getEmail());
-        dto.setSenhaHash(usuario.getSenhaHash());
-        return dto;
-    }
-
-    private Usuario convertToEntity(UsuarioDTO dto) {
-        Usuario usuario = new Usuario();
-        usuario.setIdUsuario(dto.getIdUsuario());
-        usuario.setNome(dto.getNome());
-        usuario.setEmail(dto.getEmail());
-        usuario.setSenhaHash(dto.getSenhaHash());
-        return usuario;
-    }
-
-    // Método auxiliar para outros services que precisam da entidade
     public Usuario buscarEntidadePorId(Long id) {
         return usuarioRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Usuário", id));
+    }
+
+    private UsuarioResponseDTO convertToResponseDTO(Usuario usuario) {
+        UsuarioResponseDTO dto = new UsuarioResponseDTO();
+        dto.setIdUsuario(usuario.getIdUsuario());
+        dto.setNome(usuario.getNome());
+        dto.setEmail(usuario.getEmail());
+        return dto;
+    }
+
+    @Transactional
+    @PreAuthorize("@securityService.checarAcessoUsuario(#id)")
+    public void alterarSenha(Long id, UsuarioChangePasswordDTO dto) {
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Usuário", id));
+
+        if (!passwordEncoder.matches(dto.senhaAtual(), usuario.getSenhaHash())) {
+            throw new BusinessException("Senha atual incorreta.");
+        }
+
+        usuario.setSenhaHash(passwordEncoder.encode(dto.novaSenha()));
+        usuarioRepository.save(usuario);
     }
 }

@@ -1,4 +1,4 @@
-package br.com.lorenzo.sacchet.taschetto.gerenciador_assinaturas.dto;
+package br.com.lorenzo.sacchet.taschetto.gerenciador_assinaturas.dto.pagamentoDTO;
 
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
@@ -12,20 +12,12 @@ import java.time.ZonedDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class PagamentoDTO {
-    private Long idPagamento;
-
-    @NotNull(message = "Data de pagamento é obrigatória")
-    private ZonedDateTime dataPagamento;
+public class PagamentoUpdateDTO {
 
     @NotNull(message = "Valor pago é obrigatório")
     @DecimalMin(value = "0.01", message = "Valor pago deve ser maior que zero")
     private BigDecimal valorPago;
 
-    @NotNull(message = "ID da assinatura é obrigatório")
-    private Long idAssinatura;
-
-    // Para resposta com dados relacionados
-    private String nomeAssinatura;
-    private String nomeUsuario;
+    @NotNull(message = "Data do pagamento é obrigatória")
+    private ZonedDateTime dataPagamento;
 }

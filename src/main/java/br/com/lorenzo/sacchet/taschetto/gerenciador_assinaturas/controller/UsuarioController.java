@@ -1,6 +1,9 @@
 package br.com.lorenzo.sacchet.taschetto.gerenciador_assinaturas.controller;
 
-import br.com.lorenzo.sacchet.taschetto.gerenciador_assinaturas.dto.UsuarioDTO;
+import br.com.lorenzo.sacchet.taschetto.gerenciador_assinaturas.dto.usuarioDTO.UsuarioChangePasswordDTO;
+import br.com.lorenzo.sacchet.taschetto.gerenciador_assinaturas.dto.usuarioDTO.UsuarioCreateDTO;
+import br.com.lorenzo.sacchet.taschetto.gerenciador_assinaturas.dto.usuarioDTO.UsuarioResponseDTO;
+import br.com.lorenzo.sacchet.taschetto.gerenciador_assinaturas.dto.usuarioDTO.UsuarioUpdateDTO;
 import br.com.lorenzo.sacchet.taschetto.gerenciador_assinaturas.service.UsuarioService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -9,7 +12,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -29,8 +31,8 @@ public class UsuarioController {
     @GetMapping
     @Operation(summary = "Listar todos os usuários", description = "Retorna uma lista com todos os usuários cadastrados")
     @ApiResponse(responseCode = "200", description = "Lista de usuários retornada com sucesso")
-    public ResponseEntity<List<UsuarioDTO>> listarTodos() {
-        List<UsuarioDTO> usuarios = usuarioService.listarTodos();
+    public ResponseEntity<List<UsuarioResponseDTO>> listarTodos() {
+        List<UsuarioResponseDTO> usuarios = usuarioService.listarTodos();
         return ResponseEntity.ok(usuarios);
     }
 
@@ -40,21 +42,21 @@ public class UsuarioController {
         @ApiResponse(responseCode = "200", description = "Usuário encontrado"),
         @ApiResponse(responseCode = "404", description = "Usuário não encontrado")
     })
-    public ResponseEntity<UsuarioDTO> buscarPorId(
+    public ResponseEntity<UsuarioResponseDTO> buscarPorId(
             @Parameter(description = "ID do usuário") @PathVariable Long id) {
-        Optional<UsuarioDTO> usuario = usuarioService.buscarPorId(id);
-        return usuario.map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        UsuarioResponseDTO usuario = usuarioService.buscarPorId(id);
+
+        return ResponseEntity.ok(usuario);
     }
 
-    @PostMapping
+    @PostMapping("/registrar")
     @Operation(summary = "Criar novo usuário", description = "Cria um novo usuário no sistema")
     @ApiResponses({
         @ApiResponse(responseCode = "201", description = "Usuário criado com sucesso"),
         @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos")
     })
-    public ResponseEntity<UsuarioDTO> criar(@Valid @RequestBody UsuarioDTO usuario, UriComponentsBuilder uriBuilder) {
-        UsuarioDTO usuarioSalvo = usuarioService.salvar(usuario);
+    public ResponseEntity<UsuarioResponseDTO> criar(@Valid @RequestBody UsuarioCreateDTO usuario, UriComponentsBuilder uriBuilder) {
+        UsuarioResponseDTO usuarioSalvo = usuarioService.registrar(usuario);
         URI uri = uriBuilder.path("/api/usuarios/{id}")
                 .buildAndExpand(usuarioSalvo.getIdUsuario())
                 .toUri();
@@ -68,10 +70,10 @@ public class UsuarioController {
         @ApiResponse(responseCode = "404", description = "Usuário não encontrado"),
         @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos")
     })
-    public ResponseEntity<UsuarioDTO> atualizar(
+    public ResponseEntity<UsuarioResponseDTO> atualizar(
             @Parameter(description = "ID do usuário") @PathVariable Long id,
-            @Valid @RequestBody UsuarioDTO usuario) {
-        UsuarioDTO usuarioAtualizado = usuarioService.atualizar(id, usuario);
+            @Valid @RequestBody UsuarioUpdateDTO usuario) {
+        UsuarioResponseDTO usuarioAtualizado = usuarioService.atualizar(id, usuario);
         return ResponseEntity.ok(usuarioAtualizado);
     }
 
@@ -93,9 +95,9 @@ public class UsuarioController {
         @ApiResponse(responseCode = "200", description = "Usuário encontrado"),
         @ApiResponse(responseCode = "404", description = "Usuário não encontrado")
     })
-    public ResponseEntity<UsuarioDTO> buscarPorEmail(
+    public ResponseEntity<UsuarioResponseDTO> buscarPorEmail(
             @Parameter(description = "Email do usuário") @PathVariable String email) {
-        Optional<UsuarioDTO> usuario = usuarioService.buscarPorEmail(email);
+        Optional<UsuarioResponseDTO> usuario = usuarioService.buscarPorEmail(email);
         return usuario.map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -107,5 +109,15 @@ public class UsuarioController {
             @Parameter(description = "Email para verificação") @PathVariable String email) {
         boolean existe = usuarioService.existePorEmail(email);
         return ResponseEntity.ok(existe);
+    }
+
+    @PatchMapping("/{id}/alterar-senha")
+    @Operation(summary = "Alterar senha do usuário")
+    public ResponseEntity<Void> alterarSenha(
+            @PathVariable Long id,
+            @RequestBody @Valid UsuarioChangePasswordDTO dto) {
+
+        usuarioService.alterarSenha(id, dto);
+        return ResponseEntity.noContent().build();
     }
 }

@@ -1,6 +1,7 @@
 package br.com.lorenzo.sacchet.taschetto.gerenciador_assinaturas.controller;
 
-import br.com.lorenzo.sacchet.taschetto.gerenciador_assinaturas.dto.AssinaturaDTO;
+import br.com.lorenzo.sacchet.taschetto.gerenciador_assinaturas.dto.assinaturaDTO.AssinaturaRequestDTO;
+import br.com.lorenzo.sacchet.taschetto.gerenciador_assinaturas.dto.assinaturaDTO.AssinaturaResponseDTO;
 import br.com.lorenzo.sacchet.taschetto.gerenciador_assinaturas.service.AssinaturaService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -18,7 +19,6 @@ import java.math.BigDecimal;
 import java.net.URI;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/assinaturas")
@@ -31,8 +31,8 @@ public class AssinaturaController {
     @GetMapping
     @Operation(summary = "Listar todas as assinaturas", description = "Retorna uma lista com todas as assinaturas cadastradas")
     @ApiResponse(responseCode = "200", description = "Lista de assinaturas retornada com sucesso")
-    public ResponseEntity<List<AssinaturaDTO>> listarTodas() {
-        List<AssinaturaDTO> assinaturas = assinaturaService.listarTodas();
+    public ResponseEntity<List<AssinaturaResponseDTO>> listarTodas() {
+        List<AssinaturaResponseDTO> assinaturas = assinaturaService.listarTodas();
         return ResponseEntity.ok(assinaturas);
     }
 
@@ -42,11 +42,11 @@ public class AssinaturaController {
         @ApiResponse(responseCode = "200", description = "Assinatura encontrada"),
         @ApiResponse(responseCode = "404", description = "Assinatura não encontrada")
     })
-    public ResponseEntity<AssinaturaDTO> buscarPorId(
+    public ResponseEntity<AssinaturaResponseDTO> buscarPorId(
             @Parameter(description = "ID da assinatura") @PathVariable Long id) {
-        Optional<AssinaturaDTO> assinatura = assinaturaService.buscarPorId(id);
-        return assinatura.map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        AssinaturaResponseDTO assinatura = assinaturaService.buscarPorId(id);
+
+        return ResponseEntity.ok(assinatura);
     }
 
     @PostMapping
@@ -55,8 +55,8 @@ public class AssinaturaController {
         @ApiResponse(responseCode = "201", description = "Assinatura criada com sucesso"),
         @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos")
     })
-    public ResponseEntity<AssinaturaDTO> criar(@Valid @RequestBody AssinaturaDTO assinatura, UriComponentsBuilder uriBuilder) {
-        AssinaturaDTO assinaturaSalva = assinaturaService.salvar(assinatura);
+    public ResponseEntity<AssinaturaResponseDTO> criar(@Valid @RequestBody AssinaturaRequestDTO assinatura, UriComponentsBuilder uriBuilder) {
+        AssinaturaResponseDTO assinaturaSalva = assinaturaService.salvar(assinatura);
         URI uri = uriBuilder.path("/api/assinaturas/{id}")
                 .buildAndExpand(assinaturaSalva.getIdAssinatura())
                 .toUri();
@@ -70,10 +70,10 @@ public class AssinaturaController {
         @ApiResponse(responseCode = "404", description = "Assinatura não encontrada"),
         @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos")
     })
-    public ResponseEntity<AssinaturaDTO> atualizar(
+    public ResponseEntity<AssinaturaResponseDTO> atualizar(
             @Parameter(description = "ID da assinatura") @PathVariable Long id,
-            @Valid @RequestBody AssinaturaDTO assinatura) {
-        AssinaturaDTO assinaturaAtualizada = assinaturaService.atualizar(id, assinatura);
+            @Valid @RequestBody AssinaturaRequestDTO assinatura) {
+        AssinaturaResponseDTO assinaturaAtualizada = assinaturaService.atualizar(id, assinatura);
         return ResponseEntity.ok(assinaturaAtualizada);
     }
 
@@ -95,9 +95,9 @@ public class AssinaturaController {
         @ApiResponse(responseCode = "200", description = "Assinaturas encontradas"),
         @ApiResponse(responseCode = "404", description = "Usuário não encontrado")
     })
-    public ResponseEntity<List<AssinaturaDTO>> buscarPorUsuario(
+    public ResponseEntity<List<AssinaturaResponseDTO>> buscarPorUsuario(
             @Parameter(description = "ID do usuário") @PathVariable Long idUsuario) {
-        List<AssinaturaDTO> assinaturas = assinaturaService.buscarPorUsuario(idUsuario);
+        List<AssinaturaResponseDTO> assinaturas = assinaturaService.buscarPorUsuario(idUsuario);
         return ResponseEntity.ok(assinaturas);
     }
 
@@ -107,9 +107,9 @@ public class AssinaturaController {
         @ApiResponse(responseCode = "200", description = "Assinaturas encontradas"),
         @ApiResponse(responseCode = "404", description = "Categoria não encontrada")
     })
-    public ResponseEntity<List<AssinaturaDTO>> buscarPorCategoria(
+    public ResponseEntity<List<AssinaturaResponseDTO>> buscarPorCategoria(
             @Parameter(description = "ID da categoria") @PathVariable Long idCategoria) {
-        List<AssinaturaDTO> assinaturas = assinaturaService.buscarPorCategoria(idCategoria);
+        List<AssinaturaResponseDTO> assinaturas = assinaturaService.buscarPorCategoria(idCategoria);
         return ResponseEntity.ok(assinaturas);
     }
 
@@ -119,37 +119,37 @@ public class AssinaturaController {
         @ApiResponse(responseCode = "200", description = "Assinaturas encontradas"),
         @ApiResponse(responseCode = "404", description = "Usuário ou categoria não encontrada")
     })
-    public ResponseEntity<List<AssinaturaDTO>> buscarPorUsuarioECategoria(
+    public ResponseEntity<List<AssinaturaResponseDTO>> buscarPorUsuarioECategoria(
             @Parameter(description = "ID do usuário") @PathVariable Long idUsuario,
             @Parameter(description = "ID da categoria") @PathVariable Long idCategoria) {
-        List<AssinaturaDTO> assinaturas = assinaturaService.buscarPorUsuarioECategoria(idUsuario, idCategoria);
+        List<AssinaturaResponseDTO> assinaturas = assinaturaService.buscarPorUsuarioECategoria(idUsuario, idCategoria);
         return ResponseEntity.ok(assinaturas);
     }
 
     @GetMapping("/vencendo-hoje")
     @Operation(summary = "Buscar assinaturas vencendo hoje", description = "Retorna assinaturas que vencem na data atual")
     @ApiResponse(responseCode = "200", description = "Assinaturas encontradas")
-    public ResponseEntity<List<AssinaturaDTO>> buscarAssinaturasVencendoHoje() {
-        List<AssinaturaDTO> assinaturas = assinaturaService.buscarAssinaturasVencendoHoje();
+    public ResponseEntity<List<AssinaturaResponseDTO>> buscarAssinaturasVencendoHoje() {
+        List<AssinaturaResponseDTO> assinaturas = assinaturaService.buscarAssinaturasVencendoHoje();
         return ResponseEntity.ok(assinaturas);
     }
 
     @GetMapping("/vencendo-em/{dias}")
     @Operation(summary = "Buscar assinaturas vencendo em X dias", description = "Retorna assinaturas que vencem até a quantidade de dias especificada")
     @ApiResponse(responseCode = "200", description = "Assinaturas encontradas")
-    public ResponseEntity<List<AssinaturaDTO>> buscarAssinaturasVencendoEm(
+    public ResponseEntity<List<AssinaturaResponseDTO>> buscarAssinaturasVencendoEm(
             @Parameter(description = "Quantidade de dias") @PathVariable int dias) {
-        List<AssinaturaDTO> assinaturas = assinaturaService.buscarAssinaturasVencendoEm(dias);
+        List<AssinaturaResponseDTO> assinaturas = assinaturaService.buscarAssinaturasVencendoEm(dias);
         return ResponseEntity.ok(assinaturas);
     }
 
     @GetMapping("/vencendo-ate/{data}")
     @Operation(summary = "Buscar assinaturas vencendo até data", description = "Retorna assinaturas que vencem até a data especificada")
     @ApiResponse(responseCode = "200", description = "Assinaturas encontradas")
-    public ResponseEntity<List<AssinaturaDTO>> buscarPorProximaCobrancaAte(
+    public ResponseEntity<List<AssinaturaResponseDTO>> buscarPorProximaCobrancaAte(
             @Parameter(description = "Data limite (YYYY-MM-DD)")
             @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate data) {
-        List<AssinaturaDTO> assinaturas = assinaturaService.buscarPorProximaCobrancaAte(data);
+        List<AssinaturaResponseDTO> assinaturas = assinaturaService.buscarPorProximaCobrancaAte(data);
         return ResponseEntity.ok(assinaturas);
     }
 
@@ -159,9 +159,9 @@ public class AssinaturaController {
         @ApiResponse(responseCode = "200", description = "Assinaturas encontradas"),
         @ApiResponse(responseCode = "404", description = "Tag não encontrada")
     })
-    public ResponseEntity<List<AssinaturaDTO>> buscarPorTag(
+    public ResponseEntity<List<AssinaturaResponseDTO>> buscarPorTag(
             @Parameter(description = "ID da tag") @PathVariable Long idTag) {
-        List<AssinaturaDTO> assinaturas = assinaturaService.buscarPorTag(idTag);
+        List<AssinaturaResponseDTO> assinaturas = assinaturaService.buscarPorTag(idTag);
         return ResponseEntity.ok(assinaturas);
     }
 
@@ -195,10 +195,10 @@ public class AssinaturaController {
         @ApiResponse(responseCode = "200", description = "Tag adicionada com sucesso"),
         @ApiResponse(responseCode = "404", description = "Assinatura ou tag não encontrada")
     })
-    public ResponseEntity<AssinaturaDTO> adicionarTag(
+    public ResponseEntity<AssinaturaResponseDTO> adicionarTag(
             @Parameter(description = "ID da assinatura") @PathVariable Long idAssinatura,
             @Parameter(description = "ID da tag") @PathVariable Long idTag) {
-        AssinaturaDTO assinatura = assinaturaService.adicionarTag(idAssinatura, idTag);
+        AssinaturaResponseDTO assinatura = assinaturaService.adicionarTag(idAssinatura, idTag);
         return ResponseEntity.ok(assinatura);
     }
 
@@ -208,10 +208,10 @@ public class AssinaturaController {
         @ApiResponse(responseCode = "200", description = "Tag removida com sucesso"),
         @ApiResponse(responseCode = "404", description = "Assinatura ou tag não encontrada")
     })
-    public ResponseEntity<AssinaturaDTO> removerTag(
+    public ResponseEntity<AssinaturaResponseDTO> removerTag(
             @Parameter(description = "ID da assinatura") @PathVariable Long idAssinatura,
             @Parameter(description = "ID da tag") @PathVariable Long idTag) {
-        AssinaturaDTO assinatura = assinaturaService.removerTag(idAssinatura, idTag);
+        AssinaturaResponseDTO assinatura = assinaturaService.removerTag(idAssinatura, idTag);
         return ResponseEntity.ok(assinatura);
     }
 }
