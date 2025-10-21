@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -24,9 +23,10 @@ public class CategoriaService {
                 .collect(Collectors.toList());
     }
 
-    public Optional<CategoriaDTO> buscarPorId(Long id) {
-        return categoriaRepository.findById(id)
-                .map(this::convertToDTO);
+    public CategoriaDTO buscarPorId(Long id) {
+        Categoria categoria = categoriaRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Categoria não encontrada com id: " + id));
+        return convertToDTO(categoria);
     }
 
     public CategoriaDTO salvar(CategoriaDTO categoriaDTO) {
@@ -56,9 +56,10 @@ public class CategoriaService {
         categoriaRepository.deleteById(id);
     }
 
-    public Optional<CategoriaDTO> buscarPorNome(String nome) {
-        return categoriaRepository.findByNome(nome)
-                .map(this::convertToDTO);
+    public CategoriaDTO buscarPorNome(String nome) {
+        Categoria categoria = categoriaRepository.findByNome(nome)
+                .orElseThrow(() -> new EntityNotFoundException("Categoria não encontrada com nome: " + nome));
+        return convertToDTO(categoria);
     }
 
     public boolean existePorNome(String nome) {

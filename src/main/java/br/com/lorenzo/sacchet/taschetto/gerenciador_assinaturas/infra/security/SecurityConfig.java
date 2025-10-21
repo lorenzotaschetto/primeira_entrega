@@ -26,7 +26,7 @@ public class SecurityConfig {
     @Autowired
     private AutenticacaoFilter securityFilter;
 
-    @Autowired // <-- Injete seu handler customizado
+    @Autowired
     private CustomAccessDeniedHandler customAccessDeniedHandler;
 
     @Bean
@@ -41,8 +41,16 @@ public class SecurityConfig {
                     req.requestMatchers("/v3/api-docs/**", "/api-docs/**").permitAll();
                     req.requestMatchers("/swagger-ui.html", "/swagger-ui/**").permitAll();
 
-                    req.requestMatchers("/api/categorias/**").hasRole("ADMIN");
-                    req.requestMatchers("/api/tags/**").hasRole("ADMIN");
+                    req.requestMatchers(HttpMethod.GET, "/api/categorias", "/api/categorias/**").authenticated();
+                    req.requestMatchers(HttpMethod.POST, "/api/categorias").hasRole("ADMIN");
+                    req.requestMatchers(HttpMethod.PUT, "/api/categorias/**").hasRole("ADMIN");
+                    req.requestMatchers(HttpMethod.DELETE, "/api/categorias/**").hasRole("ADMIN");
+
+                    req.requestMatchers(HttpMethod.GET, "/api/tags", "/api/tags/**").authenticated();
+                    req.requestMatchers(HttpMethod.POST, "/api/tags").hasRole("ADMIN");
+                    req.requestMatchers(HttpMethod.PUT, "/api/tags/**").hasRole("ADMIN");
+                    req.requestMatchers(HttpMethod.DELETE, "/api/tags/**").hasRole("ADMIN");
+
                     req.requestMatchers(HttpMethod.GET, "/api/usuarios").hasRole("ADMIN");
                     req.requestMatchers(HttpMethod.GET, "/api/usuarios/email/**").hasRole("ADMIN");
                     req.requestMatchers(HttpMethod.GET, "/api/usuarios/existe/**").hasRole("ADMIN");

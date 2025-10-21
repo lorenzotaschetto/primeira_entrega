@@ -15,7 +15,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/categorias")
@@ -41,9 +40,9 @@ public class CategoriaController {
     })
     public ResponseEntity<CategoriaDTO> buscarPorId(
             @Parameter(description = "ID da categoria") @PathVariable Long id) {
-        Optional<CategoriaDTO> categoria = categoriaService.buscarPorId(id);
-        return categoria.map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        CategoriaDTO categoria = categoriaService.buscarPorId(id);
+
+        return ResponseEntity.ok(categoria);
     }
 
     @PostMapping
@@ -95,9 +94,9 @@ public class CategoriaController {
     })
     public ResponseEntity<CategoriaDTO> buscarPorNome(
             @Parameter(description = "Nome da categoria") @PathVariable String nome) {
-        Optional<CategoriaDTO> categoria = categoriaService.buscarPorNome(nome);
-        return categoria.map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        CategoriaDTO categoria = categoriaService.buscarPorNome(nome);
+
+        return ResponseEntity.ok(categoria);
     }
 
     @GetMapping("/existe/{nome}")

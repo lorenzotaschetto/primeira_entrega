@@ -15,7 +15,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/tags")
@@ -41,9 +40,10 @@ public class TagController {
     })
     public ResponseEntity<TagDTO> buscarPorId(
             @Parameter(description = "ID da tag") @PathVariable Long id) {
-        Optional<TagDTO> tag = tagService.buscarPorId(id);
-        return tag.map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        TagDTO tag = tagService.buscarPorId(id);
+
+        return ResponseEntity.ok(tag);
+
     }
 
     @PostMapping
@@ -95,9 +95,9 @@ public class TagController {
     })
     public ResponseEntity<TagDTO> buscarPorNome(
             @Parameter(description = "Nome da tag") @PathVariable String nome) {
-        Optional<TagDTO> tag = tagService.buscarPorNome(nome);
-        return tag.map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        TagDTO tag = tagService.buscarPorNome(nome);
+
+        return ResponseEntity.ok(tag);
     }
 
     @PostMapping("/buscar-por-ids")

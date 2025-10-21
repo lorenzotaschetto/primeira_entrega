@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -24,9 +23,10 @@ public class TagService {
                 .collect(Collectors.toList());
     }
 
-    public Optional<TagDTO> buscarPorId(Long id) {
-        return tagRepository.findById(id)
-                .map(this::convertToDTO);
+    public TagDTO buscarPorId(Long id) {
+        Tag tag = tagRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Tag não encontrada com id: " + id));
+        return convertToDTO(tag);
     }
 
     public TagDTO salvar(TagDTO tagDTO) {
@@ -56,9 +56,10 @@ public class TagService {
         tagRepository.deleteById(id);
     }
 
-    public Optional<TagDTO> buscarPorNome(String nome) {
-        return tagRepository.findByNome(nome)
-                .map(this::convertToDTO);
+    public TagDTO buscarPorNome(String nome) {
+        Tag tag = tagRepository.findByNome(nome)
+                .orElseThrow(() -> new EntityNotFoundException("Tag não encontrada com nome: " + nome));
+        return convertToDTO(tag);
     }
 
     public boolean existePorNome(String nome) {

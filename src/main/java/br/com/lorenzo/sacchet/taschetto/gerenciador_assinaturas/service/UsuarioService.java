@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -77,9 +76,10 @@ public class UsuarioService {
         usuarioRepository.deleteById(id);
     }
 
-    public Optional<UsuarioResponseDTO> buscarPorEmail(String email) {
-        return usuarioRepository.findByEmail(email)
-                .map(this::convertToResponseDTO);
+    public UsuarioResponseDTO buscarPorEmail(String email) {
+        Usuario usuario = usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("Usuário com email: " + email));
+        return convertToResponseDTO(usuario);
     }
 
     public boolean existePorEmail(String email) {

@@ -18,7 +18,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/usuarios")
@@ -97,9 +96,9 @@ public class UsuarioController {
     })
     public ResponseEntity<UsuarioResponseDTO> buscarPorEmail(
             @Parameter(description = "Email do usuário") @PathVariable String email) {
-        Optional<UsuarioResponseDTO> usuario = usuarioService.buscarPorEmail(email);
-        return usuario.map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        UsuarioResponseDTO usuario = usuarioService.buscarPorEmail(email);
+
+        return ResponseEntity.ok(usuario);
     }
 
     @GetMapping("/existe/{email}")
