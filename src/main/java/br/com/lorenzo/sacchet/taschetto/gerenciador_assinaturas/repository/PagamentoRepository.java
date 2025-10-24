@@ -3,7 +3,6 @@ package br.com.lorenzo.sacchet.taschetto.gerenciador_assinaturas.repository;
 import br.com.lorenzo.sacchet.taschetto.gerenciador_assinaturas.model.Pagamento;
 import br.com.lorenzo.sacchet.taschetto.gerenciador_assinaturas.model.Assinatura;
 import br.com.lorenzo.sacchet.taschetto.gerenciador_assinaturas.model.Usuario;
-import org.springframework.beans.PropertyValues;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

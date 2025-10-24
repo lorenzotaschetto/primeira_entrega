@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -74,7 +75,7 @@ public class PagamentoService {
         Pagamento pagamento = buscarEntidadePorId(id);
 
         pagamento.setValorPago(dto.getValorPago());
-        pagamento.setDataPagamento(dto.getDataPagamento());
+        pagamento.setDataPagamento(dto.getDataPagamento().atStartOfDay(ZoneId.systemDefault()));
 
         Pagamento pagamentoAtualizado = pagamentoRepository.save(pagamento);
         return convertToResponseDTO(pagamentoAtualizado);
@@ -96,20 +97,27 @@ public class PagamentoService {
                 .collect(Collectors.toList());
     }
 
-    public List<PagamentoResponseDTO> buscarPorPeriodoDoUsuarioLogado(ZonedDateTime dataInicio, ZonedDateTime dataFim) {
+    public List<PagamentoResponseDTO> buscarPorPeriodoDoUsuarioLogado(LocalDate dataInicio, LocalDate dataFim) {
         Usuario usuarioLogado = securityHelper.getUsuarioAutenticado();
 
-        List<Pagamento> pagamentos = pagamentoRepository.findByAssinaturaUsuarioAndDataPagamentoBetween(usuarioLogado, dataInicio, dataFim);
+        ZonedDateTime inicioZoned = dataInicio.atStartOfDay(ZoneId.systemDefault());
+        ZonedDateTime fimZoned = dataFim.atTime(23, 59, 59).atZone(ZoneId.systemDefault());
+
+        List<Pagamento> pagamentos = pagamentoRepository.findByAssinaturaUsuarioAndDataPagamentoBetween(usuarioLogado, inicioZoned, fimZoned);
 
         return pagamentos.stream()
                 .map(this::convertToResponseDTO)
                 .collect(Collectors.toList());
     }
     @PreAuthorize("@securityService.checarPosseAssinatura(#idAssinatura)")
-    public List<PagamentoResponseDTO> buscarPorAssinaturaEPeriodo(@Param("idAssinatura") Long idAssinatura, ZonedDateTime dataInicio, ZonedDateTime dataFim) {
+    public List<PagamentoResponseDTO> buscarPorAssinaturaEPeriodo(@Param("idAssinatura") Long idAssinatura, LocalDate dataInicio, LocalDate dataFim) {
         Assinatura assinatura = assinaturaRepository.findById(idAssinatura)
-                .orElseThrow(() -> new EntityNotFoundException("Assinatura", idAssinatura)); // Redundante
-        return pagamentoRepository.findByAssinaturaAndDataPagamentoBetween(assinatura, dataInicio, dataFim).stream()
+                .orElseThrow(() -> new EntityNotFoundException("Assinatura", idAssinatura));
+
+        ZonedDateTime inicioZoned = dataInicio.atStartOfDay(ZoneId.systemDefault());
+        ZonedDateTime fimZoned = dataFim.atTime(23, 59, 59).atZone(ZoneId.systemDefault());
+
+        return pagamentoRepository.findByAssinaturaAndDataPagamentoBetween(assinatura, inicioZoned, fimZoned).stream()
                 .map(this::convertToResponseDTO)
                 .collect(Collectors.toList());
     }
@@ -117,7 +125,7 @@ public class PagamentoService {
     @PreAuthorize("@securityService.checarPosseAssinatura(#idAssinatura)")
     public BigDecimal calcularTotalPagoPorAssinatura(@Param("idAssinatura") Long idAssinatura) {
         Assinatura assinatura = assinaturaRepository.findById(idAssinatura)
-                .orElseThrow(() -> new EntityNotFoundException("Assinatura", idAssinatura)); // Redundante
+                .orElseThrow(() -> new EntityNotFoundException("Assinatura", idAssinatura));
         List<Pagamento> pagamentos = pagamentoRepository.findByAssinatura(assinatura);
         return pagamentos.stream()
                 .map(Pagamento::getValorPago)
@@ -129,9 +137,13 @@ public class PagamentoService {
         return pagamentoRepository.sumValorPagoByUsuario(usuarioLogado);
     }
 
-    public BigDecimal calcularTotalPagoPeloUsuarioLogadoPorPeriodo(ZonedDateTime dataInicio, ZonedDateTime dataFim) {
+    public BigDecimal calcularTotalPagoPeloUsuarioLogadoPorPeriodo(LocalDate dataInicio, LocalDate dataFim) {
         Usuario usuarioLogado = securityHelper.getUsuarioAutenticado();
-        return pagamentoRepository.sumValorPagoByUsuarioAndPeriodo(usuarioLogado, dataInicio, dataFim); // Exemplo
+
+        ZonedDateTime inicioZoned = dataInicio.atStartOfDay(ZoneId.systemDefault());
+        ZonedDateTime fimZoned = dataFim.atTime(23, 59, 59).atZone(ZoneId.systemDefault());
+
+        return pagamentoRepository.sumValorPagoByUsuarioAndPeriodo(usuarioLogado, inicioZoned, fimZoned);
     }
 
     private Pagamento buscarEntidadePorId(Long id) {
@@ -160,6 +172,14 @@ public class PagamentoService {
         dto.setValorPago(pagamento.getValorPago());
         if (pagamento.getAssinatura() != null) {
             dto.setIdAssinatura(pagamento.getAssinatura().getIdAssinatura());
+        }
+        dto.setNomeUsuario(pagamento.getAssinatura().getUsuario().getNome());
+        dto.setNomeMetodoPago(pagamento.getAssinatura().getMetodoPagamento().getNomePersonalizado());
+
+        if (pagamento.getValorPago().compareTo(pagamento.getAssinatura().getValor()) < 0) {
+            dto.setAlerta("O valor pago é menor que o valor da assinatura: " + pagamento.getAssinatura().getValor());
+        } else if(pagamento.getValorPago().compareTo(pagamento.getAssinatura().getValor()) > 0){
+            dto.setAlerta("O valor pago é maior que o valor da assinatura: " + pagamento.getAssinatura().getValor());
         }
         return dto;
     }

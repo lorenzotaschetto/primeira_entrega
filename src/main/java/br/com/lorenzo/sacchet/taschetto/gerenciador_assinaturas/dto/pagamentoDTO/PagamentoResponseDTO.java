@@ -17,5 +17,6 @@ public class PagamentoResponseDTO {
     private BigDecimal valorPago;
     private Long idAssinatura;
     private String nomeUsuario;
-
+    private String nomeMetodoPago;
+    private String alerta;
 }

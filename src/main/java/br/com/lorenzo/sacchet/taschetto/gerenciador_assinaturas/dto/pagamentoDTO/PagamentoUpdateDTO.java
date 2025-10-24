@@ -7,7 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.time.ZonedDateTime;
+import java.time.LocalDate;
 
 @Data
 @NoArgsConstructor
@@ -19,5 +19,5 @@ public class PagamentoUpdateDTO {
     private BigDecimal valorPago;
 
     @NotNull(message = "Data do pagamento é obrigatória")
-    private ZonedDateTime dataPagamento;
+    private LocalDate dataPagamento;
 }

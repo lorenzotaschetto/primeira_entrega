@@ -18,7 +18,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.math.BigDecimal;
 import java.net.URI;
-import java.time.ZonedDateTime;
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -106,9 +106,9 @@ public class PagamentoController {
     @ApiResponse(responseCode = "200", description = "Pagamentos encontrados")
     public ResponseEntity<List<PagamentoResponseDTO>> buscarPorPeriodo(
             @Parameter(description = "Data início (ISO format)")
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) ZonedDateTime dataInicio,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDate dataInicio,
             @Parameter(description = "Data fim (ISO format)")
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) ZonedDateTime dataFim) {
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDate dataFim) {
         List<PagamentoResponseDTO> pagamentos = pagamentoService.buscarPorPeriodoDoUsuarioLogado(dataInicio, dataFim);
         return ResponseEntity.ok(pagamentos);
     }
@@ -122,9 +122,9 @@ public class PagamentoController {
     public ResponseEntity<List<PagamentoResponseDTO>> buscarPorAssinaturaEPeriodo(
             @Parameter(description = "ID da assinatura") @PathVariable Long idAssinatura,
             @Parameter(description = "Data início (ISO format)")
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) ZonedDateTime dataInicio,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDate dataInicio,
             @Parameter(description = "Data fim (ISO format)")
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) ZonedDateTime dataFim) {
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDate dataFim) {
         List<PagamentoResponseDTO> pagamentos = pagamentoService.buscarPorAssinaturaEPeriodo(idAssinatura, dataInicio, dataFim);
         return ResponseEntity.ok(pagamentos);
     }
@@ -141,7 +141,7 @@ public class PagamentoController {
         return ResponseEntity.ok(total);
     }
 
-    @GetMapping("/usuario/{idUsuario}/total")
+    @GetMapping("/usuario/total")
     @Operation(summary = "Calcular total pago por usuário", description = "Retorna o valor total já pago por um usuário em todas suas assinaturas")
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Total calculado com sucesso"),
@@ -157,30 +157,10 @@ public class PagamentoController {
     @ApiResponse(responseCode = "200", description = "Total calculado com sucesso")
     public ResponseEntity<BigDecimal> calcularTotalPagoPorPeriodo(
             @Parameter(description = "Data início (ISO format)")
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) ZonedDateTime dataInicio,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDate dataInicio,
             @Parameter(description = "Data fim (ISO format)")
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) ZonedDateTime dataFim) {
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDate dataFim) {
         BigDecimal total = pagamentoService.calcularTotalPagoPeloUsuarioLogadoPorPeriodo(dataInicio, dataFim);
         return ResponseEntity.ok(total);
-    }
-
-    @PostMapping("/registrar")
-    @Operation(summary = "Registrar novo pagamento", description = "Registra um novo pagamento e atualiza automaticamente a próxima cobrança da assinatura associada.")
-    @ApiResponses({
-            @ApiResponse(responseCode = "201", description = "Pagamento registrado com sucesso"),
-            @ApiResponse(responseCode = "404", description = "Assinatura não encontrada"),
-            @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos no corpo da requisição")
-    })
-    public ResponseEntity<PagamentoResponseDTO> registrarPagamento(
-            @RequestBody @Valid PagamentoRequestDTO dto,
-            UriComponentsBuilder uriBuilder
-    ) {
-        PagamentoResponseDTO pagamentoSalvo = pagamentoService.registrarPagamento(dto);
-
-        URI uri = uriBuilder.path("/api/pagamentos/{id}")
-                .buildAndExpand(pagamentoSalvo.getIdPagamento())
-                .toUri();
-
-        return ResponseEntity.created(uri).body(pagamentoSalvo);
     }
 }

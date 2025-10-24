@@ -2,6 +2,7 @@ package br.com.lorenzo.sacchet.taschetto.gerenciador_assinaturas.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
@@ -18,6 +19,13 @@ import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<String> handleInvalidDateFormat(HttpMessageNotReadableException ex) {
+        String mensagem = "Formato de data inválido: " + ex.getMostSpecificCause().getMessage() + " Por favor use o formato 'dd/MM/yyyy'.";
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(mensagem);
+    }
 
     @ExceptionHandler({ AuthenticationException.class, BadCredentialsException.class })
     public ResponseEntity<ErrorResponse> handleAuthenticationException(AuthenticationException ex, WebRequest request) {
