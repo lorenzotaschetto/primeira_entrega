@@ -99,13 +99,4 @@ public class TagController {
 
         return ResponseEntity.ok(tag);
     }
-
-    @PostMapping("/buscar-por-ids")
-    @Operation(summary = "Buscar tags por IDs", description = "Retorna uma lista de tags pelos IDs fornecidos")
-    @ApiResponse(responseCode = "200", description = "Tags encontradas")
-    public ResponseEntity<List<TagDTO>> buscarPorIds(
-            @Parameter(description = "Lista de IDs das tags") @RequestBody List<Long> ids) {
-        List<TagDTO> tags = tagService.buscarPorIds(ids);
-        return ResponseEntity.ok(tags);
-    }
 }

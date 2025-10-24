@@ -124,4 +124,13 @@ public class MetodoPagamentoController {
         List<MetodoPagamentoResponseDTO> metodos = metodoPagamentoService.buscarPorUsuarioETipo(idUsuario, tipo);
         return ResponseEntity.ok(metodos);
     }
+
+    @GetMapping("/meus")
+    @PreAuthorize("hasRole('USUARIO') or hasRole('ADMIN')")
+    @Operation(summary = "Listar meus métodos de pagamento", description = "Retorna todos os métodos de pagamento do usuário logado")
+    @ApiResponse(responseCode = "200", description = "Lista de métodos de pagamento do usuário retornada com sucesso")
+    public ResponseEntity<List<MetodoPagamentoResponseDTO>> listarMeusMetodosPagamento() {
+        List<MetodoPagamentoResponseDTO> metodos = metodoPagamentoService.buscarPorUsuario();
+        return ResponseEntity.ok(metodos);
+    }
 }

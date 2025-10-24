@@ -25,4 +25,7 @@ public interface PagamentoRepository extends JpaRepository<Pagamento, Long> {
                                                @Param("inicio") ZonedDateTime inicio,
                                                @Param("fim") ZonedDateTime fim);
 
-    List<Pagamento> findByAssinaturaUsuarioAndDataPagamentoBetween(Usuario usuario, ZonedDateTime inicio, ZonedDateTime fim);}
+    List<Pagamento> findByAssinaturaUsuarioAndDataPagamentoBetween(Usuario usuario, ZonedDateTime inicio, ZonedDateTime fim);
+
+    List<Pagamento> findByAssinaturaUsuario(Usuario usuarioLogado);
+}

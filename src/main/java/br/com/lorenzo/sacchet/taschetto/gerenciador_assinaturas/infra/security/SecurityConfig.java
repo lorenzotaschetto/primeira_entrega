@@ -54,8 +54,14 @@ public class SecurityConfig {
                     req.requestMatchers(HttpMethod.GET, "/api/usuarios").hasRole("ADMIN");
                     req.requestMatchers(HttpMethod.GET, "/api/usuarios/email/**").hasRole("ADMIN");
                     req.requestMatchers(HttpMethod.GET, "/api/usuarios/existe/**").hasRole("ADMIN");
+
+                    req.requestMatchers(HttpMethod.GET, "/api/assinaturas/minhas").authenticated();
                     req.requestMatchers(HttpMethod.GET, "/api/assinaturas").hasRole("ADMIN");
+
+                    req.requestMatchers(HttpMethod.GET, "/api/pagamento/meus").authenticated();
                     req.requestMatchers(HttpMethod.GET, "/api/pagamentos").hasRole("ADMIN");
+
+                    req.requestMatchers(HttpMethod.GET, "/api/metodos-pagamento/meus").authenticated();
                     req.requestMatchers(HttpMethod.GET, "/api/metodos-pagamento").hasRole("ADMIN");
 
                     req.requestMatchers("/api/assinaturas/**").authenticated();

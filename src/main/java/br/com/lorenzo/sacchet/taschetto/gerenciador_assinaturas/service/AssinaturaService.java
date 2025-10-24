@@ -131,6 +131,13 @@ public class AssinaturaService {
                 .collect(Collectors.toList());
     }
 
+    public List<AssinaturaResponseDTO> buscarPorUsuario() {
+        Usuario usuario = securityHelper.getUsuarioAutenticado();
+        return assinaturaRepository.findByUsuario(usuario).stream()
+                .map(this::convertToResponseDTO)
+                .collect(Collectors.toList());
+    }
+
     public List<AssinaturaResponseDTO> buscarPorCategoria(Long idCategoria) {
         Usuario usuarioLogado = securityHelper.getUsuarioAutenticado();
         Categoria categoria = categoriaService.buscarEntidadePorId(idCategoria);
@@ -220,11 +227,6 @@ public class AssinaturaService {
         assinatura.getTags().remove(tag);
         Assinatura assinaturaAtualizada = assinaturaRepository.save(assinatura);
         return convertToResponseDTO(assinaturaAtualizada);
-    }
-
-    public Assinatura buscarEntidadePorId(Long id) {
-        return assinaturaRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Assinatura", id));
     }
 
     private AssinaturaResponseDTO convertToResponseDTO(Assinatura assinatura) {

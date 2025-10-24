@@ -13,6 +13,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -162,5 +163,14 @@ public class PagamentoController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDate dataFim) {
         BigDecimal total = pagamentoService.calcularTotalPagoPeloUsuarioLogadoPorPeriodo(dataInicio, dataFim);
         return ResponseEntity.ok(total);
+    }
+
+    @GetMapping("/meus")
+    @PreAuthorize("hasRole('USUARIO') or hasRole('ADMIN')")
+    @Operation(summary = "Listar meus pagamentos", description = "Retorna todos os pagamento do usuário logado")
+    @ApiResponse(responseCode = "200", description = "Lista de pagamento do usuário retornada com sucesso")
+    public ResponseEntity<List<PagamentoResponseDTO>> listarMeusPagamento() {
+        List<PagamentoResponseDTO> metodos = pagamentoService.buscarPorUsuario();
+        return ResponseEntity.ok(metodos);
     }
 }

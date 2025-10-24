@@ -12,6 +12,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -213,5 +214,14 @@ public class AssinaturaController {
             @Parameter(description = "ID da tag") @PathVariable Long idTag) {
         AssinaturaResponseDTO assinatura = assinaturaService.removerTag(idAssinatura, idTag);
         return ResponseEntity.ok(assinatura);
+    }
+
+    @GetMapping("/minhas")
+    @PreAuthorize("hasRole('USUARIO') or hasRole('ADMIN')")
+    @Operation(summary = "Listar minhas assinaturas", description = "Retorna todas as assinaturas do usuário logado")
+    @ApiResponse(responseCode = "200", description = "Lista de assinaturas do usuário retornada com sucesso")
+    public ResponseEntity<List<AssinaturaResponseDTO>> listarMinhasAssinaturas() {
+        List<AssinaturaResponseDTO> assinaturas = assinaturaService.buscarPorUsuario();
+        return ResponseEntity.ok(assinaturas);
     }
 }

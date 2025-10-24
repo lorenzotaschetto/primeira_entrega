@@ -102,6 +102,13 @@ public class MetodoPagamentoService {
                 .collect(Collectors.toList());
     }
 
+    public List<MetodoPagamentoResponseDTO> buscarPorUsuario() {
+        Usuario usuario = securityHelper.getUsuarioAutenticado();
+        return metodoPagamentoRepository.findByUsuario(usuario).stream()
+                .map(this::convertToResponseDTO)
+                .collect(Collectors.toList());
+    }
+
     public List<MetodoPagamentoResponseDTO> buscarMeusPorTipo(String tipo) {
         Usuario usuarioLogado = securityHelper.getUsuarioAutenticado();
         return metodoPagamentoRepository.findByUsuarioAndTipo(usuarioLogado, tipo).stream()

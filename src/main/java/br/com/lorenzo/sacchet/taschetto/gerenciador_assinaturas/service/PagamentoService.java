@@ -165,6 +165,16 @@ public class PagamentoService {
         };
     }
 
+    public List<PagamentoResponseDTO> buscarPorUsuario() {
+        Usuario usuarioLogado = securityHelper.getUsuarioAutenticado();
+
+        List<Pagamento> pagamentos = pagamentoRepository.findByAssinaturaUsuario(usuarioLogado);
+
+        return pagamentos.stream()
+                .map(this::convertToResponseDTO)
+                .collect(Collectors.toList());
+    }
+
     private PagamentoResponseDTO convertToResponseDTO(Pagamento pagamento) {
         PagamentoResponseDTO dto = new PagamentoResponseDTO();
         dto.setIdPagamento(pagamento.getIdPagamento());
