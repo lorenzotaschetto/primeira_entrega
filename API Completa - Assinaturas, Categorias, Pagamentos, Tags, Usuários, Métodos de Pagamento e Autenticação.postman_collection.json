@@ -1,0 +1,1429 @@
+{
+	"info": {
+		"_postman_id": "f6264453-16f3-490e-9e06-517f369a930b",
+		"name": "API Completa - Assinaturas, Categorias, Pagamentos, Tags, Usuários, Métodos de Pagamento e Autenticação",
+		"description": "Coleção completa, com todas as requisições organizadas em pastas",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "35040129"
+	},
+	"item": [
+		{
+			"name": "Pagamentos",
+			"item": [
+				{
+					"name": "Listar todos os pagamentos",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/pagamentos",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"pagamentos"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar pagamento por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/pagamentos/2",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"pagamentos",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar meus pagamento",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/pagamentos/meus",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"pagamentos",
+								"meus"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar pagamento por período",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/pagamentos/periodo?dataInicio=2023-10-01&dataFim=2025-10-23",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"pagamentos",
+								"periodo"
+							],
+							"query": [
+								{
+									"key": "dataInicio",
+									"value": "2023-10-01"
+								},
+								{
+									"key": "dataFim",
+									"value": "2025-10-23"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar pagamento por assinatura e período",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/pagamentos/assinatura/10/periodo?dataInicio=2023-10-01&dataFim=2025-10-23",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"pagamentos",
+								"assinatura",
+								"10",
+								"periodo"
+							],
+							"query": [
+								{
+									"key": "dataInicio",
+									"value": "2023-10-01"
+								},
+								{
+									"key": "dataFim",
+									"value": "2025-10-23"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar pagamento por Assinatura",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/pagamentos/assinatura/10",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"pagamentos",
+								"assinatura",
+								"10"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Criar novo pagamento",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"valorPago\":45.00,\"idAssinatura\":12}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/pagamentos",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"pagamentos"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar pagamento",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"valorPago\":55.90,\"dataPagamento\":\"2024-07-01\"}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/pagamentos/2",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"pagamentos",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Deletar pagamento",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/pagamentos/2",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"pagamentos",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Calcular total pago por assinatura",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/pagamentos/assinatura/13/total",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"pagamentos",
+								"assinatura",
+								"13",
+								"total"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Calcular total pago por usuário",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/pagamentos/usuario/total",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"pagamentos",
+								"usuario",
+								"total"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Calcular total pago por período",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/pagamentos/periodo/total?dataInicio=2023-10-01&dataFim=2025-10-23",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"pagamentos",
+								"periodo",
+								"total"
+							],
+							"query": [
+								{
+									"key": "dataInicio",
+									"value": "2023-10-01"
+								},
+								{
+									"key": "dataFim",
+									"value": "2025-10-23"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Assinaturas",
+			"item": [
+				{
+					"name": "Listar todas as assinaturas",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/assinaturas",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"assinaturas"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar assinatura por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/assinaturas/10",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"assinaturas",
+								"10"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Criar nova assinatura",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"nome\": \"Amazon Prime\",\r\n  \"valor\": 45,\r\n  \"cicloPagamento\": \"MENSAL\",\r\n  \"proximaCobranca\": \"2025-10-21\", \r\n  \"idCategoria\": 2,\r\n  \"idMetodoPago\": 6\r\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/assinaturas",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"assinaturas"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar assinatura",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"nome\": \"Netflix+\",\r\n  \"valor\": 45,\r\n  \"cicloPagamento\": \"MENSAL\",\r\n  \"proximaCobranca\": \"2025-11-25\", \r\n  \"idCategoria\": 2,\r\n  \"idMetodoPago\": 6\r\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/assinaturas/10",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"assinaturas",
+								"10"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Deletar assinatura",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/assinaturas/11",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"assinaturas",
+								"11"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar assinaturas por usuário",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/assinaturas/usuario/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"assinaturas",
+								"usuario",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar assinaturas por categoria",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/assinaturas/categoria/2",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"assinaturas",
+								"categoria",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar assinaturas por usuário e categoria",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/assinaturas/usuario/2/categoria/2",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"assinaturas",
+								"usuario",
+								"2",
+								"categoria",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar assinaturas vencendo hoje",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/assinaturas/vencendo-hoje",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"assinaturas",
+								"vencendo-hoje"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar assinaturas vencendo em X dias",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/assinaturas/vencendo-em/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"assinaturas",
+								"vencendo-em",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar assinaturas vencendo até data",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/assinaturas/vencendo-ate/2023-12-10",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"assinaturas",
+								"vencendo-ate",
+								"2023-12-10"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar assinaturas por tag",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/assinaturas/tag/2",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"assinaturas",
+								"tag",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Calcular total mensal do usuário",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/assinaturas/usuario/1/total-mensal",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"assinaturas",
+								"usuario",
+								"1",
+								"total-mensal"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Calcular total anual do usuário",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/assinaturas/usuario/1/total-anual",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"assinaturas",
+								"usuario",
+								"1",
+								"total-anual"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Adicionar tag à assinatura",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/assinaturas/10/tags/2",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"assinaturas",
+								"10",
+								"tags",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Remover tag da assinatura",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/assinaturas/10/tags/2",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"assinaturas",
+								"10",
+								"tags",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar minhas assinaturas",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/assinaturas/minhas",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"assinaturas",
+								"minhas"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Métodos de Pagamento",
+			"item": [
+				{
+					"name": "Listar todos os métodos de pagamento",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/metodos-pagamento",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"metodos-pagamento"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar método de pagamento por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/metodos-pagamento/3",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"metodos-pagamento",
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Criar novo método de pagamento",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"nomePersonalizado\": \"Cartão Bradesco\",\r\n  \"tipo\": \"CARTAO_CREDITO\",\r\n  \"infoAdicional\": \"Final 332\"\r\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/metodos-pagamento",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"metodos-pagamento"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar método de pagamento",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"nomePersonalizado\": \"Cartão Inter Gold\",\r\n  \"tipo\": \"CARTAO_CREDITO\",\r\n  \"infoAdicional\": \"Final 986\",\r\n  \"idUsuario\": 1\r\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/metodos-pagamento/4",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"metodos-pagamento",
+								"4"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Deletar método de pagamento",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/metodos-pagamento/3",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"metodos-pagamento",
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar método de pagamento por usuário",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/metodos-pagamento/usuario/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"metodos-pagamento",
+								"usuario",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar método de pagamento por tipo",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/metodos-pagamento/tipo/CARTAO_CREDITO",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"metodos-pagamento",
+								"tipo",
+								"CARTAO_CREDITO"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar método de pagamento por tipo e usuário",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/metodos-pagamento/usuario/1/tipo/CARTAO_CREDITO",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"metodos-pagamento",
+								"usuario",
+								"1",
+								"tipo",
+								"CARTAO_CREDITO"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar meus métodos de pagamento",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/metodos-pagamento/meus",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"metodos-pagamento",
+								"meus"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Categorias",
+			"item": [
+				{
+					"name": "Listar todas as categorias",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/categorias",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"categorias"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar categoria por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/categorias/2",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"categorias",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar categoria por nome",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/categorias/nome/Streaming",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"categorias",
+								"nome",
+								"Streaming"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Verificar se categoria existe",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/categorias/existe/Streaming",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"categorias",
+								"existe",
+								"Streaming"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Criar nova categoria",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"nome\":\"Games\"}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/categorias",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"categorias"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar categoria",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"nome\":\"Streaming\"}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/categorias/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"categorias",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Deletar categoria",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/categorias/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"categorias",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Tags",
+			"item": [
+				{
+					"name": "Listar todas as tags",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/tags",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"tags"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar tag por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/tags/2",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"tags",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar tag por nome",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/tags/nome/Cinema",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"tags",
+								"nome",
+								"Cinema"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Criar nova tag",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"nome\":\"Entretenimento\"}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/tags",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"tags"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar tag",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"nome\":\"Entretenimento Premium\"}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/tags/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"tags",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Deletar tag",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/tags/3",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"tags",
+								"3"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Usuários",
+			"item": [
+				{
+					"name": "Listar todos os usuários",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/usuarios",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"usuarios"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar usuário por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/usuarios/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"usuarios",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Criar novo usuário",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"nome\":\"JoãoUser\",\"email\":\"joao@email.com\", \"senha\": \"senhaforte123\"}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/usuarios/registrar",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"usuarios",
+								"registrar"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar usuário",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"nome\":\"JoãoUser\",\"email\":\"joao@email.com\"}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/usuarios/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"usuarios",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Deletar usuário",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/usuarios/2",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"usuarios",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Alterar senha usuário",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"senhaAtual\": \"senha\",\r\n  \"novaSenha\": \"senha123456\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/usuarios/2/alterar-senha",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"usuarios",
+								"2",
+								"alterar-senha"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Verificar se o email existe",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/usuarios/existe/lorenzo@email.com",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"usuarios",
+								"existe",
+								"lorenzo@email.com"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar usuário por email",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/usuarios/email/lorenzo@email.com",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"usuarios",
+								"email",
+								"lorenzo@email.com"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Autenticação",
+			"item": [
+				{
+					"name": "Login",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"email\": \"lorenzo@email.com\",\r\n  \"senha\": \"senha123456\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"login"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{authToken}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "authToken",
+			"value": "",
+			"disabled": true
+		},
+		{
+			"key": "authToken",
+			"value": ""
+		},
+		{
+			"key": "baseUrl",
+			"value": ""
+		}
+	]
+}
