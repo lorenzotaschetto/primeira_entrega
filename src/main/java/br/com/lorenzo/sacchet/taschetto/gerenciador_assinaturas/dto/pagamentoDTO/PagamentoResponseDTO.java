@@ -16,6 +16,7 @@ public class PagamentoResponseDTO {
     private ZonedDateTime dataPagamento;
     private BigDecimal valorPago;
     private Long idAssinatura;
+    private String nomeAssinatura;
     private String nomeUsuario;
     private String nomeMetodoPago;
     private String alerta;
