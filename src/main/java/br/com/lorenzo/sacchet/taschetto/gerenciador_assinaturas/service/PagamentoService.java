@@ -183,6 +183,7 @@ public class PagamentoService {
         if (pagamento.getAssinatura() != null) {
             dto.setIdAssinatura(pagamento.getAssinatura().getIdAssinatura());
         }
+        dto.setNomeAssinatura(pagamento.getAssinatura().getNome());
         dto.setNomeUsuario(pagamento.getAssinatura().getUsuario().getNome());
         dto.setNomeMetodoPago(pagamento.getAssinatura().getMetodoPagamento().getNomePersonalizado());
 

@@ -35,6 +35,9 @@ public class TokenServiceJWT {
         return Jwts.builder()
                 .issuer(ISSUER)
                 .subject(usuario.getEmail())
+
+                .claim("id", usuario.getIdUsuario())
+
                 .issuedAt(Date.from(Instant.now()))
                 .expiration(Date.from(expiracaoInstant))
                 .signWith(getSigningKey())
